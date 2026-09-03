@@ -1,84 +1,89 @@
-<sly data-sly-use.model="com.hiero.ecom.core.models.HeaderModel"
-     data-sly-use.templates="/libs/wcm/foundation/components/parsys/parsys.html">
-<header class="hiero-ecom-header" data-header-component="main" role="banner">
-    <div class="hiero-ecom-header__container">
-        <a href="${model.logoLink}" class="hiero-ecom-header__logo" aria-label="Home">
-            ${model.logoText}
+<sly data-sly-use.headerModel="com.hiero.ecom.core.models.HeaderModel">
+  <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"
+       data-sly-call="${clientLib.all @ categories=['hiero-ecom.header']}"></sly>
+
+  <header class="header" role="banner"
+          data-test="header"
+          data-logo-src="${headerModel.logoSrc}"
+          data-logo-alt="${headerModel.logoAlt}"
+          data-home-url="${headerModel.homeUrl}">
+    <div class="header__container">
+      <div class="header__logo">
+        <a href="${headerModel.homeUrl}" class="header__logo-link" aria-label="Home">
+          <img src="${headerModel.logoSrc}" alt="${headerModel.logoAlt}" class="header__logo-image" />
+        </a>
+      </div>
+
+      <button class="header__menu-toggle"
+              aria-expanded="false"
+              aria-controls="mobile-menu"
+              aria-label="Toggle navigation menu">
+        <span class="header__menu-icon"></span>
+        <span class="header__menu-icon"></span>
+        <span class="header__menu-icon"></span>
+      </button>
+
+      <nav class="header__nav" id="mobile-menu" role="navigation" aria-label="Main navigation"
+           data-test="navigation">
+        <sly data-sly-test="${headerModel.navigationItems}">
+          <ul class="navigation">
+            <sly data-sly-list="${headerModel.navigationItems}">
+              <li class="navigation__item">
+                <a href="${item.url}"
+                   class="navigation__link ${item.active ? 'navigation__link--active' : ''}"
+                   aria-current="${item.active ? 'page' : @}
+                   data-test="nav-item">${item.label}</a>
+              </li>
+            </sly>
+          </ul>
+        </sly>
+      </nav>
+
+      <div class="header__actions">
+        <button class="header__search-toggle"
+                aria-expanded="false"
+                aria-label="Toggle search"
+                data-test="search-toggle">
+          <svg class="icon icon--search" aria-hidden="true">
+            <use href="#icon-search"></use>
+          </svg>
+        </button>
+
+        <a href="/wishlist" class="wishlist-link"
+           aria-label="Wishlist"
+           data-test="wishlist-link">
+          <svg class="icon icon--heart" aria-hidden="true">
+            <use href="#icon-heart"></use>
+          </svg>
+          <span class="wishlist-link__badge" data-test="wishlist-count"></span>
         </a>
 
-        <nav class="hiero-ecom-header__nav" aria-label="Main navigation">
-            <sly data-sly-list.item="${model.navigationItems}">
-                <a href="${item.href}" 
-                   class="hiero-ecom-header__nav-link" 
-                   data-nav-link
-                   aria-label="${item.ariaLabel || item.label}">
-                    ${item.label}
-                </a>
-            </sly>
-        </nav>
-
-        <div class="hiero-ecom-header__search" role="search">
-            <form data-search-form>
-                <input type="search" 
-                       class="hiero-ecom-header__search-input" 
-                       data-search-input
-                       placeholder="Search products..."
-                       aria-label="Search products">
-            </form>
-            <div data-search-results aria-live="polite"></div>
-        </div>
-
-        <div class="hiero-ecom-header__actions">
-            <button class="hiero-ecom-header__action-button" 
-                    data-search-toggle 
-                    aria-label="Open search" 
-                    aria-expanded="false"
-                    title="Search">
-                🔍
-            </button>
-            <button class="hiero-ecom-header__action-button" 
-                    data-wishlist-toggle 
-                    aria-label="Wishlist" 
-                    title="Wishlist">
-                ❤️
-                <span class="hiero-ecom-header__wishlist-count" 
-                      data-wishlist-count="${model.wishlistCount}" 
-                      aria-label="${model.wishlistCount} items in wishlist"></span>
-            </button>
-            <button class="hiero-ecom-header__action-button" 
-                    data-cart-toggle 
-                    aria-label="Shopping cart" 
-                    title="Cart">
-                🛒
-                <span class="hiero-ecom-header__cart-count" 
-                      data-cart-count="${model.cartCount}" 
-                      aria-label="${model.cartCount} items in cart"></span>
-            </button>
-            <button class="hiero-ecom-header__menu-toggle" 
-                    data-header-menu-toggle 
-                    aria-label="Toggle menu" 
-                    aria-expanded="false">
-                ☰
-            </button>
-        </div>
-
-        <div class="hiero-ecom-header__mobile-menu" data-mobile-menu-open="false" role="navigation" aria-label="Mobile navigation">
-            <button class="hiero-ecom-header__action-button" 
-                    data-header-menu-close 
-                    aria-label="Close menu">
-                ✕
-            </button>
-            <nav class="hiero-ecom-header__mobile-nav">
-                <sly data-sly-list.item="${model.navigationItems}">
-                    <a href="${item.href}" 
-                       class="hiero-ecom-header__mobile-nav-link" 
-                       data-nav-link
-                       aria-label="${item.ariaLabel || item.label}">
-                        ${item.label}
-                    </a>
-                </sly>
-            </nav>
-        </div>
+        <a href="/cart" class="cart-link"
+           aria-label="Shopping cart"
+           data-test="cart-link">
+          <svg class="icon icon--cart" aria-hidden="true">
+            <use href="#icon-cart"></use>
+          </svg>
+          <span class="cart-link__badge" data-test="cart-count"></span>
+        </a>
+      </div>
     </div>
-</header>
+
+    <div class="header__search-panel" role="search" style="display: none;" data-test="search-panel">
+      <form class="search__form" data-test="search-form">
+        <label for="search-input" class="sr-only">Search products</label>
+        <input id="search-input" type="text" class="search__input"
+               placeholder="Search products..."
+               aria-autocomplete="list"
+               aria-label="Search products"
+               data-test="search-input" />
+        <button type="submit" class="search__button" aria-label="Search">
+          <svg class="icon icon--search" aria-hidden="true">
+            <use href="#icon-search"></use>
+          </svg>
+        </button>
+      </form>
+      <div id="search-results" class="search__results" role="listbox" data-test="search-results"></div>
+    </div>
+  </header>
 </sly>

@@ -1,69 +1,52 @@
 package com.hiero.ecom.core.validation;
 
-import org.junit.Before;
-import org.junit.Test;
+import com.hiero.ecom.core.api.ApiError;
+import org.junit.jupiter.api.Test;
+
+import javax.validation.constraints.NotBlank;
 import java.util.List;
-import static org.junit.Assert.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ValidationServiceTest {
-    
-    private ValidationService validationService;
-    
-    @Before
-    public void setUp() {
-        validationService = new ValidationService();
-    }
-    
+
     @Test
-    public void testIsEmailValid() {
-        assertTrue(validationService.isEmail("test@example.com"));
-        assertTrue(validationService.isEmail("user.name+tag@example.co.uk"));
-        assertFalse(validationService.isEmail("invalid-email"));
-        assertFalse(validationService.isEmail(null));
-        assertFalse(validationService.isEmail(""));
+    public void testValidObject() {
+        ValidationService service = new ValidationServiceImpl();
+        TestObject validObject = new TestObject("test");
+        assertTrue(service.isValid(validObject));
+        assertTrue(service.validate(validObject).isEmpty());
     }
-    
+
     @Test
-    public void testIsPhoneNumber() {
-        assertTrue(validationService.isPhoneNumber("+1234567890"));
-        assertTrue(validationService.isPhoneNumber("14155552368"));
-        assertFalse(validationService.isPhoneNumber("123"));
-        assertFalse(validationService.isPhoneNumber(null));
-        assertFalse(validationService.isPhoneNumber(""));
+    public void testInvalidObjectWithNull() {
+        ValidationService service = new ValidationServiceImpl();
+        List<ApiError.ValidationError> errors = service.validate(null);
+        assertFalse(errors.isEmpty());
+        assertEquals("object", errors.get(0).getField());
     }
-    
+
     @Test
-    public void testIsNotEmpty() {
-        assertTrue(validationService.isNotEmpty("value"));
-        assertFalse(validationService.isNotEmpty(""));
-        assertFalse(validationService.isNotEmpty("   "));
-        assertFalse(validationService.isNotEmpty(null));
+    public void testValidationException() {
+        ValidationService service = new ValidationServiceImpl();
+        TestObject invalidObject = new TestObject(null);
+        String correlationId = "test-corr-id";
+
+        assertThrows(ValidationService.ValidationException.class, () -> {
+            service.validateAndThrow(invalidObject, correlationId);
+        });
     }
-    
-    @Test
-    public void testIsPositiveNumber() {
-        assertTrue(validationService.isPositiveNumber(5));
-        assertTrue(validationService.isPositiveNumber(5.5));
-        assertFalse(validationService.isPositiveNumber(0));
-        assertFalse(validationService.isPositiveNumber(-5));
-        assertFalse(validationService.isPositiveNumber(null));
-    }
-    
-    @Test
-    public void testIsValidLength() {
-        assertTrue(validationService.isValidLength("hello", 1, 10));
-        assertTrue(validationService.isValidLength("hello", 5, 10));
-        assertFalse(validationService.isValidLength("hello", 6, 10));
-        assertFalse(validationService.isValidLength("hello", 1, 4));
-        assertFalse(validationService.isValidLength(null, 1, 10));
-    }
-    
-    @Test
-    public void testValidateRequired() {
-        List<String> errors = validationService.validateRequired("value1", "value2", "");
-        assertEquals(1, errors.size());
-        
-        errors = validationService.validateRequired(null, "", "  ");
-        assertEquals(3, errors.size());
+
+    public static class TestObject {
+        @NotBlank(message = "Name is required")
+        private String name;
+
+        public TestObject(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
     }
 }

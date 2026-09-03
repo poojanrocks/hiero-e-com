@@ -1,3 +1,5 @@
-header.css
-footer.css
-patterns.css
+# Header and Footer compiled CSS
+# Generated from ui.frontend SCSS sources
+css/header.css
+css/footer.css
+css/patterns.css

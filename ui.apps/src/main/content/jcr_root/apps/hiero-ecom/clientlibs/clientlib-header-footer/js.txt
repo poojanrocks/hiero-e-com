@@ -1,3 +1,4 @@
-header.js
-footer.js
-patterns.js
+# Header and Footer compiled JavaScript
+# Generated from ui.frontend TypeScript sources
+js/header.js
+js/footer.js

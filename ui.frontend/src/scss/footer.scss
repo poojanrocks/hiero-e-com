@@ -1,0 +1,139 @@
+$footer-bg: #1a1a1a;
+$footer-text: #e0e0e0;
+$footer-heading: #ffffff;
+$footer-link-hover: #0066cc;
+$footer-border: #333333;
+$breakpoint-mobile: 768px;
+$breakpoint-tablet: 1024px;
+
+.hiero-footer {
+  background: $footer-bg;
+  color: $footer-text;
+  padding: 3rem 0 1rem;
+  margin-top: 4rem;
+  border-top: 1px solid $footer-border;
+
+  &__container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  &__content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 3rem;
+
+    @media (max-width: $breakpoint-tablet) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    @media (max-width: $breakpoint-mobile) {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  &__section {
+    &.is-focused {
+      outline: 2px solid $footer-link-hover;
+      outline-offset: 4px;
+      border-radius: 4px;
+      padding: 0.5rem;
+    }
+  }
+
+  &__heading {
+    font-size: 1rem;
+    font-weight: bold;
+    color: $footer-heading;
+    margin: 0 0 1rem 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__link {
+    color: $footer-text;
+    text-decoration: none;
+    transition: color 0.2s;
+    display: inline-block;
+
+    &:hover {
+      color: $footer-link-hover;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $footer-link-hover;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  &__bottom {
+    border-top: 1px solid $footer-border;
+    padding-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+
+    @media (max-width: $breakpoint-mobile) {
+      flex-direction: column-reverse;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+  }
+
+  &__social {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+  }
+
+  &__social-link {
+    color: $footer-text;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: background 0.2s, color 0.2s;
+
+    &:hover {
+      background: $footer-link-hover;
+      color: white;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $footer-link-hover;
+      outline-offset: 2px;
+    }
+  }
+
+  &__copyright {
+    margin: 0;
+    font-size: 0.875rem;
+    color: rgba($footer-text, 0.7);
+
+    @media (max-width: $breakpoint-mobile) {
+      width: 100%;
+    }
+  }
+}

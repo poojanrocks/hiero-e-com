@@ -1,0 +1,98 @@
+// Global patterns and utilities
+
+.hiero-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #999;
+
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #0066cc;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.hiero-error {
+  padding: 2rem;
+  background: #fff3f3;
+  border: 1px solid #ffcccc;
+  border-radius: 4px;
+  color: #c00;
+  text-align: center;
+
+  &__icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  &__message {
+    margin: 0;
+  }
+}
+
+.hiero-empty {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #999;
+
+  &__icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+
+  &__message {
+    margin: 0;
+    font-size: 1.125rem;
+  }
+}
+
+.hiero-skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #0066cc;
+  color: white;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  z-index: 1000;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+.hiero-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// Focus visible utility
+*:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 2px;
+}

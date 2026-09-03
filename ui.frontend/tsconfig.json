@@ -1,13 +1,28 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "module": "es6",
-        "baseUrl": "../ui.frontend",
-        "removeComments": true,
-        "allowJs": true,
-        "preserveConstEnums": true,
-        "allowSyntheticDefaultImports": true,
-        "sourceMap": true
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/main/ts/*"],
+      "@services/*": ["src/main/ts/services/*"],
+      "@components/*": ["src/main/ts/components/*"],
+      "@utils/*": ["src/main/ts/utils/*"],
+      "@patterns/*": ["src/main/ts/patterns/*"]
     },
-    "include": [ "./src/**/*.ts" ]
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

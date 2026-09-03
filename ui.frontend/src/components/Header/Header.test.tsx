@@ -5,8 +5,22 @@ import { Header } from './Header';
 
 jest.mock('../../services/NavigationService');
 jest.mock('../../services/SearchService');
-jest.mock('../../services/CartService');
-jest.mock('../../services/WishlistService');
+jest.mock('../../services/CartService', () => ({
+  CartService: {
+    subscribe: jest.fn((callback) => {
+      callback([]);
+      return jest.fn();
+    }),
+  },
+}));
+jest.mock('../../services/WishlistService', () => ({
+  WishlistService: {
+    subscribe: jest.fn((callback) => {
+      callback([]);
+      return jest.fn();
+    }),
+  },
+}));
 
 describe('Header Component', () => {
   const mockNavigationItems = [

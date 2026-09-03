@@ -1,3 +1,5 @@
-../../../../../../../../../ui.frontend/dist/hiero-header.css
-../../../../../../../../../ui.frontend/dist/hiero-footer.css
-../../../../../../../../../ui.frontend/dist/hiero-patterns.css
+# Header and Footer compiled CSS
+# Generated from ui.frontend SCSS sources
+css/header.css
+css/footer.css
+css/patterns.css

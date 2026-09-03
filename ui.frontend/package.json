@@ -12,7 +12,6 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
-    "@types/vitest": "^1.1.0",
     "@testing-library/dom": "^9.3.4",
     "@testing-library/jest-dom": "^6.1.5",
     "concurrently": "^8.2.2",

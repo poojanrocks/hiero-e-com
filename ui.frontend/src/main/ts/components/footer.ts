@@ -1,52 +1,83 @@
-export class FooterComponent {
+export class Footer {
   private element: HTMLElement;
+  private accordions: NodeListOf<HTMLElement>;
+  private newsletterForm: HTMLFormElement | null;
 
-  constructor(selector: string) {
-    const el = document.querySelector(selector);
-    if (!el) throw new Error(`Footer element not found: ${selector}`);
-    
-    this.element = el as HTMLElement;
-    this.initialize();
+  constructor(element: HTMLElement) {
+    this.element = element;
+    this.accordions = element.querySelectorAll('[data-footer-accordion]');
+    this.newsletterForm = element.querySelector('[data-newsletter-form]');
+    this.init();
   }
 
-  private initialize(): void {
-    this.setupExpandableLinks();
-    this.setupAccessibility();
+  private init(): void {
+    this.bindAccordionEvents();
+    this.bindNewsletterEvents();
   }
 
-  private setupExpandableLinks(): void {
-    const expandableButtons = this.element.querySelectorAll('[data-expandable]');
-    expandableButtons.forEach(button => {
-      button.addEventListener('click', (e) => this.handleExpandClick(e));
-    });
-  }
-
-  private handleExpandClick(event: Event): void {
-    const button = event.currentTarget as HTMLElement;
-    const target = button.getAttribute('aria-controls');
-    if (!target) return;
-
-    const content = document.getElementById(target);
-    if (!content) return;
-
-    const isExpanded = button.getAttribute('aria-expanded') === 'true';
-    button.setAttribute('aria-expanded', String(!isExpanded));
-    content.classList.toggle('expanded', !isExpanded);
-  }
-
-  private setupAccessibility(): void {
-    const links = this.element.querySelectorAll('a');
-    links.forEach((link, index) => {
-      if (!link.textContent?.trim()) {
-        link.setAttribute('aria-label', `Link ${index + 1}`);
+  private bindAccordionEvents(): void {
+    this.accordions.forEach(accordion => {
+      const trigger = accordion.querySelector('[data-accordion-trigger]') as HTMLButtonElement;
+      if (trigger) {
+        trigger.addEventListener('click', () => {
+          this.toggleAccordion(accordion, trigger);
+        });
       }
     });
   }
 
-  public destroy(): void {
-    const expandableButtons = this.element.querySelectorAll('[data-expandable]');
-    expandableButtons.forEach(button => {
-      button.removeEventListener('click', (e) => this.handleExpandClick(e));
+  private toggleAccordion(accordion: HTMLElement, trigger: HTMLButtonElement): void {
+    const isOpen = accordion.getAttribute('data-open') === 'true';
+    accordion.setAttribute('data-open', String(!isOpen));
+    trigger.setAttribute('aria-expanded', String(!isOpen));
+  }
+
+  private bindNewsletterEvents(): void {
+    if (!this.newsletterForm) return;
+
+    this.newsletterForm.addEventListener('submit', (e: SubmitEvent) => {
+      e.preventDefault();
+      this.handleNewsletterSubmit();
     });
   }
+
+  private handleNewsletterSubmit(): void {
+    if (!this.newsletterForm) return;
+
+    const formData = new FormData(this.newsletterForm);
+    const email = formData.get('email');
+
+    if (email && this.validateEmail(email as string)) {
+      this.showNewsletterMessage('Success', 'Thank you for subscribing!');
+      this.newsletterForm.reset();
+    } else {
+      this.showNewsletterMessage('Error', 'Please enter a valid email address.');
+    }
+  }
+
+  private validateEmail(email: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
+  private showNewsletterMessage(type: string, message: string): void {
+    const messageElement = document.createElement('div');
+    messageElement.setAttribute('data-message-type', type.toLowerCase());
+    messageElement.textContent = message;
+    messageElement.setAttribute('role', 'alert');
+    this.newsletterForm?.insertAdjacentElement('afterend', messageElement);
+
+    setTimeout(() => messageElement.remove(), 5000);
+  }
+
+  public destroy(): void {
+    // Cleanup if needed
+  }
 }
+
+declare global {
+  interface Window {
+    Footer: typeof Footer;
+  }
+}
+
+window.Footer = Footer;

@@ -1,3 +1,4 @@
-../../../../../../../../../ui.frontend/dist/hiero-header.js
-../../../../../../../../../ui.frontend/dist/hiero-footer.js
-../../../../../../../../../ui.frontend/dist/hiero-patterns.js
+# Header and Footer compiled JavaScript
+# Generated from ui.frontend TypeScript sources
+js/header.js
+js/footer.js

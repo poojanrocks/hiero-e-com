@@ -1,105 +1,89 @@
-import { StateManager } from '../state-manager';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { stateManager } from '../StateManager';
 import type { AppState } from '../../types';
 
 describe('StateManager', () => {
-  let stateManager: StateManager;
-
   beforeEach(() => {
-    // Clear localStorage
+    stateManager.reset();
     localStorage.clear();
-    stateManager = StateManager.getInstance();
   });
 
   afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('should initialize with default state', () => {
+    const state = stateManager.getState();
+    expect(state.cartCount).toBe(0);
+    expect(state.wishlistCount).toBe(0);
+    expect(state.searchQuery).toBe('');
+    expect(state.isSearchOpen).toBe(false);
+  });
+
+  it('should update cart count', () => {
+    stateManager.updateCartCount(5);
+    const state = stateManager.getState();
+    expect(state.cartCount).toBe(5);
+  });
+
+  it('should prevent negative cart count', () => {
+    stateManager.updateCartCount(-1);
+    const state = stateManager.getState();
+    expect(state.cartCount).toBe(0);
+  });
+
+  it('should update wishlist count', () => {
+    stateManager.updateWishlistCount(3);
+    const state = stateManager.getState();
+    expect(state.wishlistCount).toBe(3);
+  });
+
+  it('should set search query', () => {
+    stateManager.setSearchQuery('laptop');
+    const state = stateManager.getState();
+    expect(state.searchQuery).toBe('laptop');
+  });
+
+  it('should toggle search open state', () => {
+    stateManager.setSearchOpen(true);
+    expect(stateManager.getState().isSearchOpen).toBe(true);
+    stateManager.setSearchOpen(false);
+    expect(stateManager.getState().isSearchOpen).toBe(false);
+  });
+
+  it('should notify listeners on state change', () => {
+    const listener = vi.fn();
+    stateManager.subscribe(listener);
+    stateManager.updateCartCount(2);
+    expect(listener).toHaveBeenCalled();
+    const passedState = listener.mock.calls[0][0] as AppState;
+    expect(passedState.cartCount).toBe(2);
+  });
+
+  it('should allow unsubscribing from state changes', () => {
+    const listener = vi.fn();
+    const unsubscribe = stateManager.subscribe(listener);
+    unsubscribe();
+    stateManager.updateCartCount(2);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('should persist state to localStorage', () => {
+    stateManager.updateCartCount(7);
+    const stored = localStorage.getItem('hiero_ecom_state');
+    expect(stored).toBeTruthy();
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      expect(parsed.cartCount).toBe(7);
+    }
+  });
+
+  it('should reset to default state', () => {
+    stateManager.updateCartCount(10);
+    stateManager.updateWishlistCount(5);
     stateManager.reset();
-  });
-
-  describe('Singleton Pattern', () => {
-    it('should return same instance', () => {
-      const instance1 = StateManager.getInstance();
-      const instance2 = StateManager.getInstance();
-      expect(instance1).toBe(instance2);
-    });
-  });
-
-  describe('Cart Management', () => {
-    it('should update cart state', () => {
-      stateManager.updateCart({
-        total: 100,
-        itemCount: 2
-      });
-
-      const state = stateManager.getState();
-      expect(state.cart.total).toBe(100);
-      expect(state.cart.itemCount).toBe(2);
-    });
-  });
-
-  describe('Search Management', () => {
-    it('should update search state', () => {
-      stateManager.updateSearch({
-        term: 'test',
-        loading: true
-      });
-
-      const state = stateManager.getState();
-      expect(state.search.term).toBe('test');
-      expect(state.search.loading).toBe(true);
-    });
-  });
-
-  describe('Wishlist Management', () => {
-    it('should update wishlist state', () => {
-      stateManager.updateWishlist({
-        count: 5
-      });
-
-      const state = stateManager.getState();
-      expect(state.wishlist.count).toBe(5);
-    });
-  });
-
-  describe('State Subscription', () => {
-    it('should notify listeners on state change', () => {
-      const listener = jest.fn();
-      stateManager.subscribe(listener);
-      stateManager.setMobileMenuOpen(true);
-
-      expect(listener).toHaveBeenCalled();
-    });
-
-    it('should unsubscribe listener', () => {
-      const listener = jest.fn();
-      const unsubscribe = stateManager.subscribe(listener);
-      unsubscribe();
-      stateManager.setMobileMenuOpen(true);
-
-      expect(listener).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('Persistence', () => {
-    it('should persist cart and wishlist to localStorage', () => {
-      stateManager.updateCart({
-        total: 50,
-        itemCount: 1
-      });
-
-      const stored = localStorage.getItem('hiero-ecom-state');
-      expect(stored).toBeTruthy();
-      const parsed = JSON.parse(stored || '{}');
-      expect(parsed.cart.total).toBe(50);
-    });
-  });
-
-  describe('Reset', () => {
-    it('should reset to initial state', () => {
-      stateManager.updateCart({ total: 100 });
-      stateManager.reset();
-
-      const state = stateManager.getState();
-      expect(state.cart.total).toBe(0);
-      expect(state.cart.itemCount).toBe(0);
-    });
+    const state = stateManager.getState();
+    expect(state.cartCount).toBe(0);
+    expect(state.wishlistCount).toBe(0);
   });
 });

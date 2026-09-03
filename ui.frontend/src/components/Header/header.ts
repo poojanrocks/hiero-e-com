@@ -1,153 +1,212 @@
-import '../../../styles/components/header.scss';
+import { stateManager } from '../../services/StateManager';
+import type { HeaderConfig } from '../../types';
+import '../styles/header.scss';
 
-interface HeaderConfig {
-  selector?: string;
-}
+class Header {
+  private container: HTMLElement | null;
+  private config: HeaderConfig;
+  private mobileMenuOpen: boolean = false;
 
-export class Header {
-  private element: HTMLElement | null;
-
-  constructor(config: HeaderConfig = {}) {
-    this.element = document.querySelector(config.selector || '[data-component="header"]');
-    if (this.element) {
+  constructor(containerId: string, config: HeaderConfig) {
+    this.container = document.getElementById(containerId);
+    this.config = config;
+    if (this.container) {
       this.init();
     }
   }
 
   private init(): void {
-    this.setupNavigation();
-    this.setupSearch();
-    this.setupCart();
-    this.setupWishlist();
-    this.setupMobileMenu();
-    this.setupAccessibility();
+    if (!this.container) return;
+    
+    this.render();
+    this.attachEventListeners();
+    this.subscribeToState();
+    this.initializeAccessibility();
   }
 
-  private setupNavigation(): void {
-    const navItems = this.element?.querySelectorAll('[data-nav-item]');
-    navItems?.forEach(item => {
-      item.addEventListener('click', (e) => this.handleNavClick(e));
-      item.addEventListener('keydown', (e) => this.handleNavKeydown(e));
+  private render(): void {
+    if (!this.container) return;
+
+    const nav = this.renderNavigation();
+    const search = this.renderSearch();
+    const utilities = this.renderUtilities();
+    const mobileToggle = this.renderMobileToggle();
+
+    this.container.innerHTML = `
+      <header class="header" role="banner">
+        <div class="header__top">
+          <div class="header__logo">
+            ${this.config.logo ? `<img src="${this.config.logo}" alt="${this.config.logoAlt || 'Logo'}" class="header__logo-img">` : '<span class="header__logo-text">Hiero</span>'}
+          </div>
+          ${search}
+          ${utilities}
+          ${mobileToggle}
+        </div>
+        ${nav}
+      </header>
+    `;
+  }
+
+  private renderNavigation(): string {
+    const items = this.config.navigation
+      .map(
+        (item) =>
+          `<li class="nav-item">
+            <a href="${item.href}" class="nav-link ${item.active ? 'nav-link--active' : ''}" aria-current="${item.active ? 'page' : 'false'}">
+              ${item.label}
+            </a>
+            ${item.children ? `<ul class="nav-submenu">${this.renderSubmenu(item.children)}</ul>` : ''}
+          </li>`
+      )
+      .join('');
+
+    return `
+      <nav class="header__nav" role="navigation" aria-label="Main navigation">
+        <ul class="nav-list">${items}</ul>
+      </nav>
+    `;
+  }
+
+  private renderSubmenu(items: typeof this.config.navigation): string {
+    return items
+      .map(
+        (item) =>
+          `<li class="nav-item nav-item--sub">
+            <a href="${item.href}" class="nav-link">${item.label}</a>
+          </li>`
+      )
+      .join('');
+  }
+
+  private renderSearch(): string {
+    return `
+      <div class="header__search">
+        <form class="search-form" role="search">
+          <input
+            type="search"
+            class="search-form__input"
+            placeholder="Search products..."
+            aria-label="Search products"
+            autocomplete="off"
+          />
+          <button type="submit" class="search-form__button" aria-label="Submit search">
+            <span aria-hidden="true">🔍</span>
+          </button>
+        </form>
+      </div>
+    `;
+  }
+
+  private renderUtilities(): string {
+    return `
+      <div class="header__utilities">
+        <a href="/wishlist" class="utility-link" aria-label="Wishlist">
+          ♡ <span class="utility-badge" data-count="wishlist">0</span>
+        </a>
+        <a href="/cart" class="utility-link" aria-label="Shopping cart">
+          🛒 <span class="utility-badge" data-count="cart">0</span>
+        </a>
+      </div>
+    `;
+  }
+
+  private renderMobileToggle(): string {
+    return `
+      <button class="header__mobile-toggle" aria-label="Toggle mobile menu" aria-expanded="false" aria-controls="header-nav">
+        <span class="hamburger">
+          <span class="hamburger__line"></span>
+          <span class="hamburger__line"></span>
+          <span class="hamburger__line"></span>
+        </span>
+      </button>
+    `;
+  }
+
+  private attachEventListeners(): void {
+    if (!this.container) return;
+
+    const searchForm = this.container.querySelector('.search-form');
+    searchForm?.addEventListener('submit', (e) => this.handleSearch(e));
+
+    const mobileToggle = this.container.querySelector('.header__mobile-toggle');
+    mobileToggle?.addEventListener('click', () => this.toggleMobileMenu());
+
+    const navLinks = this.container.querySelectorAll('.nav-link');
+    navLinks.forEach((link) => {
+      link.addEventListener('click', () => this.handleNavigation(link as HTMLAnchorElement));
     });
+
+    document.addEventListener('keydown', (e) => this.handleKeyboard(e));
   }
 
-  private setupSearch(): void {
-    const searchBtn = this.element?.querySelector('[data-search-toggle]');
-    searchBtn?.addEventListener('click', () => this.toggleSearch());
-    searchBtn?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        this.toggleSearch();
-      }
-    });
-  }
-
-  private setupCart(): void {
-    const cartBtn = this.element?.querySelector('[data-cart-toggle]');
-    cartBtn?.addEventListener('click', () => this.toggleCart());
-    cartBtn?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        this.toggleCart();
-      }
-    });
-  }
-
-  private setupWishlist(): void {
-    const wishlistBtn = this.element?.querySelector('[data-wishlist-toggle]');
-    wishlistBtn?.addEventListener('click', () => this.toggleWishlist());
-    wishlistBtn?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        this.toggleWishlist();
-      }
-    });
-  }
-
-  private setupMobileMenu(): void {
-    const menuBtn = this.element?.querySelector('[data-mobile-menu-toggle]');
-    menuBtn?.addEventListener('click', () => this.toggleMobileMenu());
-    menuBtn?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        this.toggleMobileMenu();
-      }
-    });
-
-    const closeBtn = this.element?.querySelector('[data-mobile-menu-close]');
-    closeBtn?.addEventListener('click', () => this.closeMobileMenu());
-  }
-
-  private setupAccessibility(): void {
-    this.element?.setAttribute('role', 'banner');
-    const closeButton = this.element?.querySelector('button');
-    if (closeButton) {
-      closeButton.setAttribute('aria-label', 'Close menu');
+  private handleSearch(e: Event): void {
+    e.preventDefault();
+    const input = this.container?.querySelector('.search-form__input') as HTMLInputElement;
+    if (input?.value) {
+      stateManager.setSearchQuery(input.value);
+      console.log('Search triggered:', input.value);
+      // Dispatch custom event for search
+      this.container?.dispatchEvent(
+        new CustomEvent('header:search', { detail: { query: input.value } })
+      );
     }
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.handleEscape();
-      }
-    });
-  }
-
-  private handleNavClick(e: Event): void {
-    const target = e.currentTarget as HTMLElement;
-    this.element?.querySelectorAll('[data-nav-item]').forEach(item => {
-      item.classList.remove('active');
-    });
-    target.classList.add('active');
-  }
-
-  private handleNavKeydown(e: KeyboardEvent): void {
-    const target = e.currentTarget as HTMLElement;
-    let nextItem: Element | null = null;
-
-    if (e.key === 'ArrowRight') {
-      nextItem = target.nextElementSibling;
-    } else if (e.key === 'ArrowLeft') {
-      nextItem = target.previousElementSibling;
-    }
-
-    if (nextItem instanceof HTMLElement) {
-      nextItem.focus();
-    }
-  }
-
-  private toggleSearch(): void {
-    const searchPanel = this.element?.querySelector('[data-search-panel]');
-    searchPanel?.classList.toggle('active');
-  }
-
-  private toggleCart(): void {
-    const cartPanel = this.element?.querySelector('[data-cart-panel]');
-    cartPanel?.classList.toggle('active');
-  }
-
-  private toggleWishlist(): void {
-    const wishlistPanel = this.element?.querySelector('[data-wishlist-panel]');
-    wishlistPanel?.classList.toggle('active');
   }
 
   private toggleMobileMenu(): void {
-    const mobileMenu = this.element?.querySelector('[data-mobile-menu]');
-    mobileMenu?.classList.toggle('active');
-    this.element?.setAttribute('aria-expanded', 'true');
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+    const nav = this.container?.querySelector('.header__nav');
+    const toggle = this.container?.querySelector('.header__mobile-toggle') as HTMLButtonElement;
+    if (nav && toggle) {
+      nav.setAttribute('aria-hidden', String(!this.mobileMenuOpen));
+      toggle.setAttribute('aria-expanded', String(this.mobileMenuOpen));
+      nav.classList.toggle('header__nav--open');
+    }
   }
 
-  private closeMobileMenu(): void {
-    const mobileMenu = this.element?.querySelector('[data-mobile-menu]');
-    mobileMenu?.classList.remove('active');
-    this.element?.setAttribute('aria-expanded', 'false');
+  private handleNavigation(link: HTMLAnchorElement): void {
+    const allLinks = this.container?.querySelectorAll('.nav-link');
+    allLinks?.forEach((l) => l.classList.remove('nav-link--active'));
+    link.classList.add('nav-link--active');
   }
 
-  private handleEscape(): void {
-    this.closeMobileMenu();
+  private handleKeyboard(e: KeyboardEvent): void {
+    if (e.key === 'Escape' && this.mobileMenuOpen) {
+      this.toggleMobileMenu();
+    }
+  }
+
+  private subscribeToState(): void {
+    stateManager.subscribe((state) => {
+      if (this.container) {
+        const cartBadge = this.container.querySelector('[data-count="cart"]');
+        const wishlistBadge = this.container.querySelector('[data-count="wishlist"]');
+        if (cartBadge) cartBadge.textContent = String(state.cartCount);
+        if (wishlistBadge) wishlistBadge.textContent = String(state.wishlistCount);
+      }
+    });
+  }
+
+  private initializeAccessibility(): void {
+    if (!this.container) return;
+    const header = this.container.querySelector('header');
+    if (header) {
+      header.setAttribute('aria-label', 'Site header');
+    }
+  }
+
+  public updateCart(count: number): void {
+    stateManager.updateCartCount(count);
+  }
+
+  public updateWishlist(count: number): void {
+    stateManager.updateWishlistCount(count);
   }
 
   public destroy(): void {
-    if (this.element) {
-      this.element = null;
+    if (this.container) {
+      this.container.innerHTML = '';
     }
   }
 }
+
+export default Header;

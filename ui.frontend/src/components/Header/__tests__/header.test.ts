@@ -1,113 +1,121 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Header } from '../header';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
+import Header from '../Header';
+import type { HeaderConfig } from '../../../types';
 
 describe('Header Component', () => {
   let container: HTMLDivElement;
+  let header: Header;
+  const mockConfig: HeaderConfig = {
+    logo: '/logo.png',
+    logoAlt: 'Test Logo',
+    navigation: [
+      { label: 'Home', href: '/', active: true },
+      { label: 'Shop', href: '/shop', children: [{ label: 'Electronics', href: '/shop/electronics' }] },
+      { label: 'About', href: '/about' },
+    ],
+  };
 
   beforeEach(() => {
     container = document.createElement('div');
-    container.setAttribute('data-component', 'header');
-    container.innerHTML = `
-      <button data-mobile-menu-toggle aria-label="Toggle menu">Menu</button>
-      <nav>
-        <a href="/" data-nav-item>Home</a>
-        <a href="/products" data-nav-item>Products</a>
-      </nav>
-      <button data-search-toggle aria-label="Search">Search</button>
-      <button data-cart-toggle aria-label="Cart">Cart</button>
-      <button data-wishlist-toggle aria-label="Wishlist">Wishlist</button>
-      <div data-search-panel></div>
-      <div data-cart-panel></div>
-      <div data-wishlist-panel></div>
-      <div data-mobile-menu>
-        <button data-mobile-menu-close aria-label="Close menu">Close</button>
-      </div>
-    `;
+    container.id = 'test-header';
     document.body.appendChild(container);
+    header = new Header('test-header', mockConfig);
   });
 
   afterEach(() => {
+    header.destroy();
     document.body.removeChild(container);
   });
 
-  it('should initialize header component', () => {
-    const header = new Header();
-    expect(header).toBeDefined();
+  it('should render header with logo', () => {
+    const logo = screen.getByAltText('Test Logo');
+    expect(logo).toBeTruthy();
+    expect((logo as HTMLImageElement).src).toContain('/logo.png');
   });
 
-  it('should set banner role on header element', () => {
-    const header = new Header();
-    expect(container.getAttribute('role')).toBe('banner');
+  it('should render navigation items', () => {
+    expect(screen.getByText('Home')).toBeTruthy();
+    expect(screen.getByText('Shop')).toBeTruthy();
+    expect(screen.getByText('About')).toBeTruthy();
+  });
+
+  it('should have correct active link', () => {
+    const homeLink = screen.getByText('Home') as HTMLAnchorElement;
+    expect(homeLink.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('should render search form', () => {
+    const searchInput = screen.getByPlaceholderText('Search products..') as HTMLInputElement;
+    expect(searchInput).toBeTruthy();
+    expect(searchInput.type).toBe('search');
+  });
+
+  it('should render cart and wishlist utilities', () => {
+    const cartLink = screen.getByLabelText('Shopping cart');
+    const wishlistLink = screen.getByLabelText('Wishlist');
+    expect(cartLink).toBeTruthy();
+    expect(wishlistLink).toBeTruthy();
+  });
+
+  it('should render mobile menu toggle', () => {
+    const toggle = screen.getByLabelText('Toggle mobile menu') as HTMLButtonElement;
+    expect(toggle).toBeTruthy();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('should toggle mobile menu on button click', () => {
-    const header = new Header();
-    const menuBtn = container.querySelector('[data-mobile-menu-toggle]');
-    const mobileMenu = container.querySelector('[data-mobile-menu]');
+    const toggle = screen.getByLabelText('Toggle mobile menu') as HTMLButtonElement;
+    const nav = document.querySelector('.header__nav') as HTMLElement;
 
-    menuBtn?.dispatchEvent(new MouseEvent('click'));
-    expect(mobileMenu?.classList.contains('active')).toBe(true);
-
-    menuBtn?.dispatchEvent(new MouseEvent('click'));
-    expect(mobileMenu?.classList.contains('active')).toBe(false);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(nav.classList.contains('header__nav--open')).toBe(true);
   });
 
   it('should close mobile menu on Escape key', () => {
-    const header = new Header();
-    const menuBtn = container.querySelector('[data-mobile-menu-toggle]');
-    const mobileMenu = container.querySelector('[data-mobile-menu]');
+    const toggle = screen.getByLabelText('Toggle mobile menu') as HTMLButtonElement;
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
 
-    menuBtn?.dispatchEvent(new MouseEvent('click'));
-    expect(mobileMenu?.classList.contains('active')).toBe(true);
-
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
-    expect(mobileMenu?.classList.contains('active')).toBe(false);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('should handle navigation item click', () => {
-    const header = new Header();
-    const navItems = container.querySelectorAll('[data-nav-item]');
-    const firstItem = navItems[0];
+  it('should handle search submission', async () => {
+    const user = userEvent.setup();
+    const searchInput = screen.getByPlaceholderText('Search products..');
+    const searchForm = screen.getByRole('search') as HTMLFormElement;
 
-    firstItem?.dispatchEvent(new MouseEvent('click'));
-    expect(firstItem?.classList.contains('active')).toBe(true);
+    await user.type(searchInput, 'laptop');
+    await user.click(screen.getByLabelText('Submit search'));
 
-    const secondItem = navItems[1];
-    secondItem?.dispatchEvent(new MouseEvent('click'));
-    expect(firstItem?.classList.contains('active')).toBe(false);
-    expect(secondItem?.classList.contains('active')).toBe(true);
+    expect((searchInput as HTMLInputElement).value).toBe('laptop');
   });
 
-  it('should toggle search panel', () => {
-    const header = new Header();
-    const searchBtn = container.querySelector('[data-search-toggle]');
-    const searchPanel = container.querySelector('[data-search-panel]');
-
-    searchBtn?.dispatchEvent(new MouseEvent('click'));
-    expect(searchPanel?.classList.contains('active')).toBe(true);
+  it('should update cart count', () => {
+    header.updateCart(5);
+    const cartBadge = screen.getByText('5');
+    expect(cartBadge).toBeTruthy();
   });
 
-  it('should toggle cart panel', () => {
-    const header = new Header();
-    const cartBtn = container.querySelector('[data-cart-toggle]');
-    const cartPanel = container.querySelector('[data-cart-panel]');
-
-    cartBtn?.dispatchEvent(new MouseEvent('click'));
-    expect(cartPanel?.classList.contains('active')).toBe(true);
+  it('should update wishlist count', () => {
+    header.updateWishlist(3);
+    const badges = screen.getAllByText('3');
+    expect(badges.length).toBeGreaterThan(0);
   });
 
-  it('should toggle wishlist panel', () => {
-    const header = new Header();
-    const wishlistBtn = container.querySelector('[data-wishlist-toggle]');
-    const wishlistPanel = container.querySelector('[data-wishlist-panel]');
-
-    wishlistBtn?.dispatchEvent(new MouseEvent('click'));
-    expect(wishlistPanel?.classList.contains('active')).toBe(true);
+  it('should have proper ARIA labels', () => {
+    expect(screen.getByRole('banner')).toBeTruthy();
+    expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeTruthy();
+    expect(screen.getByRole('search')).toBeTruthy();
   });
 
-  it('should destroy component', () => {
-    const header = new Header();
-    header.destroy();
-    expect(header).toBeDefined();
+  it('should highlight active navigation link on click', async () => {
+    const shopLink = screen.getByText('Shop') as HTMLAnchorElement;
+    fireEvent.click(shopLink);
+    expect(shopLink.classList.contains('nav-link--active')).toBe(true);
   });
 });

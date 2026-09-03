@@ -1,14 +1,33 @@
 {
+  "name": "hiero-ecommerce",
+  "version": "1.0.0",
+  "description": "Hiero eCommerce AEM Project",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "devDependencies": {
+    "@testing-library/dom": "^9.3.4",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/user-event": "^14.5.1",
+    "@types/node": "^20.10.6",
+    "@types/vitest": "^1.1.0",
+    "@vitest/ui": "^1.1.0",
     "axe-core": "^4.13.0",
     "eslint": "^10.9.1",
+    "happy-dom": "^12.10.3",
     "husky": "^9.1.7",
+    "jsdom": "^23.0.1",
     "lighthouse": "^13.4.1",
     "lint-staged": "^16.4.0",
     "prettier": "^3.9.6",
+    "sass": "^1.69.5",
+    "sass-embedded": "^1.69.5",
     "snyk": "^1.1307.0",
     "stylelint": "^17.14.1",
-    "vitest": "^5.0.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "vitest": "^1.1.0",
     "web-vitals": "^6.2.1"
   }
 }

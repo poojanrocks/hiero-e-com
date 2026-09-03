@@ -38,7 +38,7 @@ describe('UIPatterns', () => {
 
   it('should escape HTML in error messages', () => {
     UIPatterns.renderErrorState(container, '<script>alert("xss")</script>');
-    expect(container.innerHTML).not.toContain('<script>');
+    expect(container.querySelector('script')).toBeNull();
     expect(container.textContent).toContain('<script>');
   });
 });

@@ -1,4 +1,4 @@
-import './styles/patterns.scss';
+import '../styles/patterns.scss';
 import { UIState } from './types';
 
 class UIPatterns {
@@ -31,10 +31,14 @@ class UIPatterns {
           <path d="M12 7v5" stroke="currentColor" stroke-width="2"/>
           <circle cx="12" cy="17" r="1" fill="currentColor"/>
         </svg>
-        <p class="hiero-error__message">${this.escapeHtml(message)}</p>
+        <p class="hiero-error__message"></p>
         <button class="hiero-error__action" onclick="location.reload()">Try again</button>
       </div>
     `;
+    const messageElement = container.querySelector('.hiero-error__message');
+    if (messageElement) {
+      messageElement.textContent = message;
+    }
   }
 
   renderEmptyState(container: HTMLElement, title: string = 'No items found', description?: string): void {

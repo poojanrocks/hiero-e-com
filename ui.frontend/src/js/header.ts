@@ -1,4 +1,4 @@
-import './styles/header.scss';
+import '../styles/header.scss';
 import { HeaderConfig } from './types';
 import cartService from './services/cartService';
 import wishlistService from './services/wishlistService';

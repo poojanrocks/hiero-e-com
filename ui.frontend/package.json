@@ -15,7 +15,6 @@
     "@testing-library/dom": "^9.3.4",
     "@testing-library/jest-dom": "^6.1.5",
     "@types/node": "^20.10.6",
-    "@types/vitest": "^1.1.0",
     "@vitest/ui": "^1.1.0",
     "autoprefixer": "^10.4.16",
     "css-loader": "^6.8.1",

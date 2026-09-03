@@ -1,4 +1,4 @@
-import './styles/footer.scss';
+import '../styles/footer.scss';
 import { FooterConfig } from './types';
 
 class Footer {

@@ -2,18 +2,23 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  entry: './src/index.ts',
+  mode: 'production',
+  entry: {
+    'hiero-header': './src/js/header.ts',
+    'hiero-footer': './src/js/footer.ts',
+    'hiero-patterns': './src/js/patterns.ts'
+  },
   output: {
-    path: path.resolve(__dirname, '../ui.apps/src/main/content/jcr_root/apps/hiero-ecom/clientlibs/clientlib-header-footer'),
-    filename: 'js/[name].js',
-    library: 'HieroEcom',
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].js',
+    library: '[name]',
     libraryTarget: 'umd'
   },
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: 'babel-loader',
+        test: /\.ts$/,
+        use: 'ts-loader',
         exclude: /node_modules/
       },
       {
@@ -21,25 +26,19 @@ module.exports = {
         use: [
           MiniCssExtractPlugin.loader,
           'css-loader',
+          'postcss-loader',
           'sass-loader'
         ]
       }
     ]
   },
   resolve: {
-    extensions: ['.ts', '.js', '.scss'],
-    alias: {
-      '@': path.resolve(__dirname, 'src/')
-    }
+    extensions: ['.ts', '.js']
   },
   plugins: [
     new MiniCssExtractPlugin({
-      filename: 'css/[name].css'
+      filename: '[name].css'
     })
   ],
-  devServer: {
-    static: './dist',
-    hot: true,
-    port: 3000
-  }
+  devtool: 'source-map'
 };

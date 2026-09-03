@@ -1,4 +1,3 @@
-#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-header.js
-#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-footer.js
-#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-patterns.js
-#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-services.js
+../../../../../../../../../ui.frontend/dist/hiero-header.js
+../../../../../../../../../ui.frontend/dist/hiero-footer.js
+../../../../../../../../../ui.frontend/dist/hiero-patterns.js

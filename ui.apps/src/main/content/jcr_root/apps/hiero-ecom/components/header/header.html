@@ -1,10 +1,66 @@
-<sly data-sly-use.header="com.hiero.ecom.core.models.HeaderModel"
-     data-sly-attribute.data-header-config="${header.headerConfig @ context='scriptString'}"
-     class="header-container" id="app-header">
-  <!-- Header component is rendered by TypeScript/React in ui.frontend -->
-  <!-- The HTL provides the container and data attributes for initialization -->
-  <div data-component="header" 
-       data-navigation="${header.navigationItems @ context='scriptString'}" 
-       data-logo="${header.logoUrl}"
-       data-logo-alt="${header.logoAlt}"></div>
-</sly>
+<header data-component="header" role="banner" class="header">
+  <div class="header__top">
+    <div class="header__logo">
+      <a href="${properties.logoUrl || '/'}">
+        <img src="${properties.logoImagePath || '/logo.png'}"
+             alt="${properties.logoAlt || 'Hiero eCommerce'}" />
+      </a>
+    </div>
+
+    <div class="header__middle">
+      <form class="header__search" data-role="search-form" action="/search" method="get">
+        <input type="search"
+               name="search"
+               class="header__search-input"
+               placeholder="Search products..."
+               aria-label="Search products"
+               autocomplete="off" />
+        <button type="submit" class="header__search-button" aria-label="Search">🔍</button>
+      </form>
+    </div>
+
+    <div class="header__actions">
+      <a href="/search" class="header__action-button" data-role="search-link" aria-label="Search">
+        🔍
+      </a>
+      <a href="/wishlist" class="header__action-button" data-role="wishlist-link" aria-label="Wishlist">
+        ❤️
+        <span class="header__badge" data-role="wishlist-count" aria-live="polite">0</span>
+      </a>
+      <a href="/cart" class="header__action-button" data-role="cart-link" aria-label="Shopping cart">
+        🛒
+        <span class="header__badge" data-role="cart-count" aria-live="polite">0</span>
+      </a>
+      <button class="header__action-button"
+              data-toggle="mobile-menu"
+              aria-label="Toggle mobile menu"
+              aria-expanded="false"
+              aria-controls="main-nav">
+        ☰
+      </button>
+    </div>
+  </div>
+
+  <nav class="header__nav" data-role="navigation" id="main-nav" aria-label="Main navigation">
+    <ul class="header__nav-list">
+      <li class="header__nav-item">
+        <a href="/" class="header__nav-link" data-role="nav-item">Home</a>
+      </li>
+      <li class="header__nav-item">
+        <a href="/products" class="header__nav-link" data-role="nav-item">Products</a>
+      </li>
+      <li class="header__nav-item">
+        <a href="/collections" class="header__nav-link" data-role="nav-item">Collections</a>
+      </li>
+      <li class="header__nav-item">
+        <a href="/about" class="header__nav-link" data-role="nav-item">About</a>
+      </li>
+      <li class="header__nav-item">
+        <a href="/contact" class="header__nav-link" data-role="nav-item">Contact</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"
+     data-sly-call="${clientLib.all @ categories='hiero-header'}"></sly>

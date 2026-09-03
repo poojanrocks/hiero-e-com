@@ -1,34 +1,24 @@
 {
-  "name": "hiero-ecom-ui-frontend",
+  "name": "hiero-ecommerce-ui-frontend",
   "version": "1.0.0",
-  "description": "UI Frontend for Hiero eCommerce AEM",
+  "description": "Frontend assets for Hiero eCommerce",
   "scripts": {
-    "build": "webpack --mode production",
-    "dev": "webpack --mode development --watch",
+    "build": "tsc && sass src/main/scss:dist/css && node scripts/build.js",
+    "build:watch": "concurrently \"tsc -w\" \"sass --watch src/main/scss:dist/css\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src --ext .ts,.js",
-    "format": "prettier --write \"src/**/*.{ts,js,scss}\""
+    "lint": "eslint src --ext .ts",
+    "dev": "npm run build:watch"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/vitest": "^1.1.0",
     "@testing-library/dom": "^9.3.4",
     "@testing-library/jest-dom": "^6.1.5",
-    "@types/node": "^20.10.6",
-    "@vitest/ui": "^1.1.0",
-    "autoprefixer": "^10.4.16",
-    "css-loader": "^6.8.1",
-    "eslint": "^10.9.1",
+    "concurrently": "^8.2.2",
     "happy-dom": "^12.10.3",
-    "mini-css-extract-plugin": "^2.7.6",
-    "postcss": "^8.4.32",
-    "postcss-loader": "^7.3.4",
     "sass": "^1.69.5",
-    "sass-loader": "^13.3.3",
-    "style-loader": "^3.3.3",
     "typescript": "^5.3.3",
-    "vitest": "^1.1.0",
-    "webpack": "^5.90.0",
-    "webpack-cli": "^5.1.4"
+    "vitest": "^1.1.0"
   }
 }

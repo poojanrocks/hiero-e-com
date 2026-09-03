@@ -1,73 +1,54 @@
-import type { AppState, StateListener, Cart, SearchQuery, Wishlist } from '../types';
+export interface State {
+  cartCount: number;
+  wishlistCount: number;
+  searchQuery: string;
+  isSearchOpen: boolean;
+}
 
-export class StateManager {
-  private static instance: StateManager;
-  private state: AppState;
+type StateListener = (state: State) => void;
+
+const defaultState: State = {
+  cartCount: 0,
+  wishlistCount: 0,
+  searchQuery: '',
+  isSearchOpen: false,
+};
+
+class StateManager {
+  private state: State = defaultState;
   private listeners: Set<StateListener> = new Set();
-  private readonly STORAGE_KEY = 'hiero-ecom-state';
+  private storageKey = 'hiero-ecom-state';
 
-  private constructor() {
-    this.state = this.initializeState();
-    this.hydrate();
+  constructor() {
+    this.loadFromStorage();
   }
 
-  static getInstance(): StateManager {
-    if (!StateManager.instance) {
-      StateManager.instance = new StateManager();
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        this.state = { ...defaultState, ...parsed };
+      }
+    } catch (error) {
+      console.error('Failed to load state from storage:', error);
     }
-    return StateManager.instance;
   }
 
-  private initializeState(): AppState {
-    return {
-      cart: {
-        items: [],
-        total: 0,
-        itemCount: 0
-      },
-      search: {
-        term: '',
-        results: [],
-        loading: false
-      },
-      wishlist: {
-        items: [],
-        count: 0
-      },
-      mobileMenuOpen: false,
-      mobileSearchOpen: false
-    };
+  private saveToStorage(): void {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.state));
+    } catch (error) {
+      console.error('Failed to save state to storage:', error);
+    }
   }
 
-  getState(): AppState {
+  private notifyListeners(): void {
+    this.listeners.forEach(listener => listener(this.state));
+  }
+
+  getState(): State {
     return { ...this.state };
-  }
-
-  updateCart(cart: Partial<Cart>): void {
-    this.state.cart = { ...this.state.cart, ...cart };
-    this.persist();
-    this.notifyListeners();
-  }
-
-  updateSearch(search: Partial<SearchQuery>): void {
-    this.state.search = { ...this.state.search, ...search };
-    this.notifyListeners();
-  }
-
-  updateWishlist(wishlist: Partial<Wishlist>): void {
-    this.state.wishlist = { ...this.state.wishlist, ...wishlist };
-    this.persist();
-    this.notifyListeners();
-  }
-
-  setMobileMenuOpen(open: boolean): void {
-    this.state.mobileMenuOpen = open;
-    this.notifyListeners();
-  }
-
-  setMobileSearchOpen(open: boolean): void {
-    this.state.mobileSearchOpen = open;
-    this.notifyListeners();
   }
 
   subscribe(listener: StateListener): () => void {
@@ -75,38 +56,67 @@ export class StateManager {
     return () => this.listeners.delete(listener);
   }
 
-  private notifyListeners(): void {
-    this.listeners.forEach(listener => listener(this.getState()));
-  }
-
-  private hydrate(): void {
-    try {
-      if (typeof localStorage === 'undefined') return;
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        this.state = { ...this.state, ...parsed };
-      }
-    } catch (error) {
-      console.warn('Failed to hydrate state from localStorage', error);
+  updateCartCount(count: number): void {
+    const newCount = Math.max(0, count);
+    if (newCount !== this.state.cartCount) {
+      this.state.cartCount = newCount;
+      this.saveToStorage();
+      this.notifyListeners();
     }
   }
 
-  private persist(): void {
-    try {
-      if (typeof localStorage === 'undefined') return;
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify({
-        cart: this.state.cart,
-        wishlist: this.state.wishlist
-      }));
-    } catch (error) {
-      console.warn('Failed to persist state to localStorage', error);
+  incrementCartCount(): void {
+    this.updateCartCount(this.state.cartCount + 1);
+  }
+
+  decrementCartCount(): void {
+    this.updateCartCount(this.state.cartCount - 1);
+  }
+
+  updateWishlistCount(count: number): void {
+    const newCount = Math.max(0, count);
+    if (newCount !== this.state.wishlistCount) {
+      this.state.wishlistCount = newCount;
+      this.saveToStorage();
+      this.notifyListeners();
+    }
+  }
+
+  incrementWishlistCount(): void {
+    this.updateWishlistCount(this.state.wishlistCount + 1);
+  }
+
+  decrementWishlistCount(): void {
+    this.updateWishlistCount(this.state.wishlistCount - 1);
+  }
+
+  setSearchQuery(query: string): void {
+    if (query !== this.state.searchQuery) {
+      this.state.searchQuery = query;
+      this.saveToStorage();
+      this.notifyListeners();
+    }
+  }
+
+  toggleSearchOpen(): void {
+    this.state.isSearchOpen = !this.state.isSearchOpen;
+    this.saveToStorage();
+    this.notifyListeners();
+  }
+
+  setSearchOpen(isOpen: boolean): void {
+    if (isOpen !== this.state.isSearchOpen) {
+      this.state.isSearchOpen = isOpen;
+      this.saveToStorage();
+      this.notifyListeners();
     }
   }
 
   reset(): void {
-    this.state = this.initializeState();
-    this.persist();
+    this.state = { ...defaultState };
+    this.saveToStorage();
     this.notifyListeners();
   }
 }
+
+export const stateManager = new StateManager();

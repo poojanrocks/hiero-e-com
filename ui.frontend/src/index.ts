@@ -1,43 +1,35 @@
-import Header from './components/Header/Header';
-import Footer from './components/Footer/Footer';
-import { stateManager } from './services/StateManager';
-import type { HeaderConfig, FooterConfig } from './types';
+import { Header } from './components/Header';
+import { Footer } from './components/Footer';
+import { stateManager } from './services/state-manager';
+import { cartService } from './services/cart-service';
+import { wishlistService } from './services/wishlist-service';
+import { searchService } from './services/search-service';
 
-// Initialize header and footer on page load
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize header
-  const headerElement = document.querySelector('[data-component="header"]');
+// Export all services and components for external use
+export {
+  Header,
+  Footer,
+  stateManager,
+  cartService,
+  wishlistService,
+  searchService,
+};
+
+// Auto-initialize header and footer components if DOM elements exist
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeComponents);
+} else {
+  initializeComponents();
+}
+
+function initializeComponents(): void {
+  const headerElement = document.querySelector('.hiero-header-wrapper') as HTMLElement;
   if (headerElement) {
-    const config = (headerElement.parentElement as any)?.dataset?.headerConfig;
-    const headerConfig: HeaderConfig = config
-      ? JSON.parse(config)
-      : {
-          navigation: [
-            { label: 'Home', href: '/', active: true },
-            { label: 'Shop', href: '/shop' },
-            { label: 'About', href: '/about' },
-          ],
-        };
-    new Header('app-header', headerConfig);
+    new Header(headerElement);
   }
 
-  // Initialize footer
-  const footerElement = document.querySelector('[data-component="footer"]');
+  const footerElement = document.querySelector('.hiero-footer-wrapper') as HTMLElement;
   if (footerElement) {
-    const config = (footerElement.parentElement as any)?.dataset?.footerConfig;
-    const footerConfig: FooterConfig = config
-      ? JSON.parse(config)
-      : {
-          companyName: 'Hiero eCommerce',
-          links: [
-            { label: 'About', href: '/about' },
-            { label: 'Contact', href: '/contact' },
-          ],
-        };
-    new Footer('app-footer', footerConfig);
+    new Footer(footerElement);
   }
-});
-
-// Export for external use
-export { Header, Footer, stateManager };
-export type { HeaderConfig, FooterConfig };
+}

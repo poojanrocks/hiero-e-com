@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0"
+<jcr:root xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
+    xmlns:cq="http://www.day.com/jcr/cq/1.0"
     xmlns:jcr="http://www.jcp.org/jcr/1.0"
-    jcr:primaryType="cq:Dialog"
+    xmlns:nt="http://www.jcp.org/jcr/nt/1.0"
+    jcr:primaryType="nt:unstructured"
     jcr:title="Header"
     sling:resourceType="cq/gui/components/authoring/dialog">
     <content
@@ -12,32 +14,38 @@
                 jcr:primaryType="nt:unstructured"
                 sling:resourceType="granite/ui/components/coral/foundation/tabs">
                 <items jcr:primaryType="nt:unstructured">
-                    <basic
+                    <properties
                         jcr:primaryType="nt:unstructured"
-                        jcr:title="Basic"
+                        jcr:title="Properties"
                         sling:resourceType="granite/ui/components/coral/foundation/container"
                         margin="true">
                         <items jcr:primaryType="nt:unstructured">
-                            <brandName
+                            <logoText
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                fieldDescription="Brand name displayed in header"
-                                fieldLabel="Brand Name"
-                                name="./brandName"/>
-                            <logoPath
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="cq/gui/components/authoring/dialog/fileupload"
-                                fieldDescription="Path to logo image"
-                                fieldLabel="Logo Path"
-                                name="./logoPath"/>
-                            <navigationPath
+                                fieldLabel="Logo Text"
+                                name="./logoText"
+                                value="Store"/>
+                            <logoLink
                                 jcr:primaryType="nt:unstructured"
                                 sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                fieldDescription="Path to navigation configuration"
-                                fieldLabel="Navigation Path"
-                                name="./navigationPath"/>
+                                fieldLabel="Logo Link"
+                                name="./logoLink"
+                                value="/"/>
+                            <cartCount
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/numberfield"
+                                fieldLabel="Cart Count"
+                                name="./cartCount"
+                                value="0"/>
+                            <wishlistCount
+                                jcr:primaryType="nt:unstructured"
+                                sling:resourceType="granite/ui/components/coral/foundation/form/numberfield"
+                                fieldLabel="Wishlist Count"
+                                name="./wishlistCount"
+                                value="0"/>
                         </items>
-                    </basic>
+                    </properties>
                 </items>
             </tabs>
         </items>

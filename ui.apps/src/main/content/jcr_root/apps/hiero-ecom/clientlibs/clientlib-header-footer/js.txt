@@ -1,3 +1,4 @@
-header.js
-footer.js
-patterns.js
+#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-header.js
+#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-footer.js
+#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-patterns.js
+#include /apps/hiero-ecom/../ui.frontend.clientlibs/js/hiero-ecom-services.js

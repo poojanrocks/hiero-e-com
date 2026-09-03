@@ -1,55 +1,46 @@
-<footer class="footer" role="contentinfo" data-component="footer">
-  <div class="footer__container">
-    <div class="footer__content">
-      <div class="footer__column">
-        <h3 class="footer__heading">Company</h3>
-        <ul class="footer__list">
-          <li><a href="/about" class="footer__link">About Us</a></li>
-          <li><a href="/careers" class="footer__link">Careers</a></li>
-          <li><a href="/press" class="footer__link">Press</a></li>
-          <li><a href="/blog" class="footer__link">Blog</a></li>
-        </ul>
-      </div>
-
-      <div class="footer__column">
-        <h3 class="footer__heading">Support</h3>
-        <ul class="footer__list">
-          <li><a href="/contact" class="footer__link">Contact Us</a></li>
-          <li><a href="/faq" class="footer__link">FAQ</a></li>
-          <li><a href="/shipping" class="footer__link">Shipping Info</a></li>
-          <li><a href="/returns" class="footer__link">Returns</a></li>
-        </ul>
-      </div>
-
-      <div class="footer__column">
-        <h3 class="footer__heading">Legal</h3>
-        <ul class="footer__list">
-          <li><a href="/privacy" class="footer__link">Privacy Policy</a></li>
-          <li><a href="/terms" class="footer__link">Terms of Service</a></li>
-          <li><a href="/cookies" class="footer__link">Cookie Policy</a></li>
-          <li><a href="/disclaimer" class="footer__link">Disclaimer</a></li>
-        </ul>
-      </div>
-
-      <div class="footer__column">
-        <h3 class="footer__heading">Follow Us</h3>
-        <div class="footer__social">
-          <a href="#" class="footer__social-link" aria-label="Facebook">f</a>
-          <a href="#" class="footer__social-link" aria-label="Twitter">𝕏</a>
-          <a href="#" class="footer__social-link" aria-label="Instagram">📷</a>
-          <a href="#" class="footer__social-link" aria-label="LinkedIn">in</a>
+<sly data-sly-use.model="com.hiero.ecom.core.models.FooterModel">
+<footer class="hiero-ecom-footer" data-footer-component="main" role="contentinfo">
+    <div class="hiero-ecom-footer__container">
+        <div class="hiero-ecom-footer__content">
+            <sly data-sly-list.group="${model.footerGroups}">
+                <div class="hiero-ecom-footer__group" 
+                     data-footer-group 
+                     data-footer-group-open="false">
+                    <button class="hiero-ecom-footer__group-toggle" 
+                            data-footer-group-toggle
+                            aria-expanded="false"
+                            aria-label="Toggle ${group.title}">
+                        <span class="hiero-ecom-footer__group-title">${group.title}</span>
+                    </button>
+                    <div class="hiero-ecom-footer__group-items" role="navigation">
+                        <sly data-sly-list.item="${group.items}">
+                            <a href="${item.href}" 
+                               class="hiero-ecom-footer__link"
+                               aria-label="${item.ariaLabel || item.label}">
+                                ${item.label}
+                            </a>
+                        </sly>
+                    </div>
+                </div>
+            </sly>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="footer__bottom">
-    <div class="footer__container">
-      <p class="footer__copyright">&copy; 2024 Hiero eCommerce. All rights reserved.</p>
-      <div class="footer__badges">
-        <span class="footer__badge">Secure Checkout</span>
-        <span class="footer__badge">Free Shipping Over $50</span>
-      </div>
+        <div class="hiero-ecom-footer__bottom">
+            <p class="hiero-ecom-footer__copyright">
+                &copy; ${model.currentYear} ${model.companyName}. All rights reserved.
+            </p>
+            <div class="hiero-ecom-footer__social" role="list" aria-label="Social media links">
+                <sly data-sly-list.social="${model.socialLinks}">
+                    <a href="${social.url}" 
+                       class="hiero-ecom-footer__social-link" 
+                       aria-label="${social.label}"
+                       target="_blank"
+                       rel="noopener noreferrer">
+                        ${social.icon}
+                    </a>
+                </sly>
+            </div>
+        </div>
     </div>
-  </div>
 </footer>
+</sly>

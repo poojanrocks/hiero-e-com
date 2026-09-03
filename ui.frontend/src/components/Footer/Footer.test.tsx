@@ -1,86 +1,89 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Footer from './Footer';
+import '@testing-library/jest-dom';
+import { Footer } from './Footer';
 
 describe('Footer Component', () => {
-  it('renders copyright text', () => {
-    const copyright = '© 2024 My Store';
-    render(<Footer copyright={copyright} />);
+  const mockColumns = [
+    {
+      title: 'Company',
+      links: [
+        { label: 'About Us', url: '/about' },
+        { label: 'Contact', url: '/contact' }
+      ]
+    },
+    {
+      title: 'Products',
+      links: [
+        { label: 'Electronics', url: '/electronics' },
+        { label: 'Clothing', url: '/clothing' }
+      ]
+    }
+  ];
 
-    expect(screen.getByText(copyright)).toBeInTheDocument();
-  });
+  const mockSocialLinks = [
+    { label: 'Facebook', url: 'https://facebook.com', icon: 'f' },
+    { label: 'Twitter', url: 'https://twitter.com', icon: '𝕏' }
+  ];
 
-  it('renders footer columns with links', () => {
-    const columns = [
-      {
-        title: 'Company',
-        links: [
-          { label: 'About Us', url: '/about' },
-          { label: 'Careers', url: '/careers' }
-        ]
-      },
-      {
-        title: 'Support',
-        links: [
-          { label: 'Contact', url: '/contact' },
-          { label: 'FAQ', url: '/faq' }
-        ]
-      }
-    ];
-
-    render(<Footer columns={columns} />);
-
-    expect(screen.getByText('Company')).toBeInTheDocument();
-    expect(screen.getByText('Support')).toBeInTheDocument();
-    expect(screen.getByText('About Us')).toBeInTheDocument();
-    expect(screen.getByText('Contact')).toBeInTheDocument();
-  });
-
-  it('renders legal links', () => {
+  test('renders footer with contentinfo role', () => {
     render(<Footer />);
-
-    expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
-    expect(screen.getByText('Terms of Service')).toBeInTheDocument();
-    expect(screen.getByText('Cookie Settings')).toBeInTheDocument();
-  });
-
-  it('renders newsletter section when enabled', () => {
-    render(<Footer newsletter={true} />);
-
-    expect(screen.getByText('Newsletter')).toBeInTheDocument();
-    expect(screen.getByLabelText('Email address')).toBeInTheDocument();
-  });
-
-  it('renders social links', () => {
-    const socialLinks = [
-      { label: 'Facebook', url: 'https://facebook.com', icon: '#icon-facebook' },
-      { label: 'Twitter', url: 'https://twitter.com', icon: '#icon-twitter' }
-    ];
-
-    render(<Footer socialLinks={socialLinks} />);
-
-    const facebookLink = screen.getByLabelText('Facebook');
-    const twitterLink = screen.getByLabelText('Twitter');
-
-    expect(facebookLink).toHaveAttribute('href', 'https://facebook.com');
-    expect(twitterLink).toHaveAttribute('href', 'https://twitter.com');
-  });
-
-  it('has proper accessibility structure', () => {
-    render(<Footer />);
-
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
   });
 
-  it('opens social links in new tab', () => {
-    const socialLinks = [
-      { label: 'Facebook', url: 'https://facebook.com', icon: '#icon-facebook' }
-    ];
+  test('renders copyright information', () => {
+    const currentYear = new Date().getFullYear();
+    render(<Footer companyName="Test Company" copyrightYear={currentYear} />);
+    expect(screen.getByText(new RegExp(`© ${currentYear} Test Company`))).toBeInTheDocument();
+  });
 
-    render(<Footer socialLinks={socialLinks} />);
+  test('renders footer columns', () => {
+    render(<Footer columns={mockColumns} />);
+    expect(screen.getByText('Company')).toBeInTheDocument();
+    expect(screen.getByText('Products')).toBeInTheDocument();
+  });
 
+  test('renders column links', () => {
+    render(<Footer columns={mockColumns} />);
+    expect(screen.getByText('About Us')).toBeInTheDocument();
+    expect(screen.getByText('Electronics')).toBeInTheDocument();
+  });
+
+  test('renders social links with correct attributes', () => {
+    render(<Footer socialLinks={mockSocialLinks} />);
     const facebookLink = screen.getByLabelText('Facebook');
+    expect(facebookLink).toBeInTheDocument();
+    expect(facebookLink).toHaveAttribute('href', 'https://facebook.com');
     expect(facebookLink).toHaveAttribute('target', '_blank');
-    expect(facebookLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  test('renders legal navigation', () => {
+    render(<Footer />);
+    const legalNav = screen.getByLabelText('Legal navigation');
+    expect(legalNav).toBeInTheDocument();
+    expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
+    expect(screen.getByText('Terms of Service')).toBeInTheDocument();
+  });
+
+  test('renders legal links with correct hrefs', () => {
+    render(<Footer />);
+    const privacyLink = screen.getByText('Privacy Policy');
+    const termsLink = screen.getByText('Terms of Service');
+    expect(privacyLink).toHaveAttribute('href', '/privacy');
+    expect(termsLink).toHaveAttribute('href', '/terms');
+  });
+
+  test('renders multiple columns layout', () => {
+    render(<Footer columns={mockColumns} />);
+    const companyTitle = screen.getByText('Company');
+    const productsTitle = screen.getByText('Products');
+    expect(companyTitle).toBeInTheDocument();
+    expect(productsTitle).toBeInTheDocument();
+  });
+
+  test('has proper link accessibility attributes', () => {
+    render(<Footer socialLinks={mockSocialLinks} />);
+    const twitterLink = screen.getByLabelText('Twitter');
+    expect(twitterLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 });

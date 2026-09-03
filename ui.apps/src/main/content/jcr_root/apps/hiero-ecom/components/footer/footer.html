@@ -1,77 +1,59 @@
-<sly data-sly-use.footerModel="com.hiero.ecom.core.models.FooterModel">
-  <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"
-       data-sly-call="${clientLib.all @ categories=['hiero-ecom.footer']}"></sly>
-
-  <footer class="footer" role="contentinfo"
-          data-test="footer"
-          data-newsletter="${footerModel.newsletter}"
-          data-social-links="${footerModel.socialLinksJson}">
-    <div class="footer__container">
-      <div class="footer__content" data-test="footer-columns">
-        <sly data-sly-test="${footerModel.columns}">
-          <sly data-sly-list="${footerModel.columns}">
-            <div class="footer__column" data-test="footer-column">
-              <h3 class="footer__heading">${item.title}</h3>
-              <ul class="footer__list">
+<footer
+  class="footer"
+  role="contentinfo"
+  data-component="footer"
+  data-columns="${footer.columns @ context='html'}"
+  data-company-name="${footer.companyName @ context='html'}"
+  data-social-links="${footer.socialLinks @ context='html'}">
+  <div class="footer__container">
+    <div class="footer__content">
+      <sly data-sly-test="${footer.columns}">
+        <div class="footer__columns">
+          <sly data-sly-list="${footer.columns}">
+            <div class="footer__column">
+              <h3 class="footer__column-title">${item.title}</h3>
+              <ul class="footer__links">
                 <sly data-sly-list="${item.links}">
-                  <li class="footer__item">
-                    <a href="${item.url}" class="footer__link" data-test="footer-link">${item.label}</a>
+                  <li class="footer__link-item">
+                    <a href="${item.url}" class="footer__link">${item.label}</a>
                   </li>
                 </sly>
               </ul>
             </div>
           </sly>
-        </sly>
-
-        <sly data-sly-test="${footerModel.newsletter}">
-          <div class="footer__column footer__column--newsletter" data-test="newsletter-section">
-            <h3 class="footer__heading">Newsletter</h3>
-            <p class="footer__description">Subscribe for updates and exclusive offers</p>
-            <form class="footer__newsletter" data-sly-use.formHelper="com.adobe.cq.sightly.WCMUse" onsubmit="return false;">
-              <input type="email"
-                     placeholder="Enter your email"
-                     aria-label="Email address"
-                     class="footer__input"
-                     data-test="newsletter-input"
-                     required />
-              <button type="submit" class="footer__button" aria-label="Subscribe" data-test="newsletter-button">
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </sly>
-      </div>
-
-      <sly data-sly-test="${footerModel.socialLinks}">
-        <div class="footer__social" data-test="social-links">
-          <h3 class="sr-only">Follow us</h3>
-          <ul class="footer__social-list">
-            <sly data-sly-list="${footerModel.socialLinks}">
-              <li class="footer__social-item">
-                <a href="${item.url}"
-                   aria-label="${item.label}"
-                   class="footer__social-link"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   data-test="social-link">
-                  <svg class="icon" aria-hidden="true">
-                    <use href="${item.icon}"></use>
-                  </svg>
-                </a>
-              </li>
-            </sly>
-          </ul>
         </div>
       </sly>
     </div>
 
-    <div class="footer__bottom" data-test="footer-bottom">
-      <p class="footer__copyright">${footerModel.copyright}</p>
-      <ul class="footer__legal">
-        <li><a href="/privacy" data-test="privacy-link">Privacy Policy</a></li>
-        <li><a href="/terms" data-test="terms-link">Terms of Service</a></li>
-        <li><a href="/cookies" data-test="cookies-link">Cookie Settings</a></li>
-      </ul>
-    </div>
-  </footer>
-</sly>
+    <sly data-sly-test="${footer.socialLinks}">
+      <div class="footer__social">
+        <h3 class="footer__social-title">Follow Us</h3>
+        <ul class="footer__social-list">
+          <sly data-sly-list="${footer.socialLinks}">
+            <li class="footer__social-item">
+              <a
+                href="${item.url}"
+                class="footer__social-link"
+                aria-label="${item.label}"
+                target="_blank"
+                rel="noopener noreferrer">
+                <span class="footer__social-icon">${item.icon}</span>
+              </a>
+            </li>
+          </sly>
+        </ul>
+      </div>
+    </sly>
+  </div>
+
+  <div class="footer__bottom">
+    <p class="footer__copyright">
+      &copy; <span id="footer-year"></span> ${footer.companyName}. All rights reserved.
+    </p>
+    <nav class="footer__legal" aria-label="Legal navigation">
+      <a href="/privacy" class="footer__legal-link">Privacy Policy</a>
+      <a href="/terms" class="footer__legal-link">Terms of Service</a>
+      <a href="/cookies" class="footer__legal-link">Cookie Settings</a>
+    </nav>
+  </div>
+</footer>

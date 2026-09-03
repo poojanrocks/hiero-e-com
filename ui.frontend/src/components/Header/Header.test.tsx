@@ -1,128 +1,96 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import Header from './Header';
-import * as cartHook from '../../hooks/useCart';
-import * as searchHook from '../../hooks/useSearch';
-import * as wishlistHook from '../../hooks/useWishlist';
+import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import { Header } from './Header';
 
-jest.mock('../../hooks/useCart');
-jest.mock('../../hooks/useSearch');
-jest.mock('../../hooks/useWishlist');
-
-const mockUseCart = cartHook.useCart as jest.MockedFunction<typeof cartHook.useCart>;
-const mockUseSearch = searchHook.useSearch as jest.MockedFunction<typeof searchHook.useSearch>;
-const mockUseWishlist = wishlistHook.useWishlist as jest.MockedFunction<typeof wishlistHook.useWishlist>;
+jest.mock('../../services/NavigationService');
+jest.mock('../../services/SearchService');
+jest.mock('../../services/CartService');
+jest.mock('../../services/WishlistService');
 
 describe('Header Component', () => {
+  const mockNavigationItems = [
+    { url: '/', label: 'Home' },
+    { url: '/products', label: 'Products' },
+    { url: '/about', label: 'About' }
+  ];
+
   beforeEach(() => {
-    mockUseCart.mockReturnValue({
-      cartCount: 0,
-      isLoading: false,
-      error: null,
-      addToCart: jest.fn(),
-      removeFromCart: jest.fn()
-    });
-
-    mockUseSearch.mockReturnValue({
-      onSearch: jest.fn()
-    });
-
-    mockUseWishlist.mockReturnValue({
-      wishlistCount: 0,
-      isLoading: false,
-      error: null,
-      addToWishlist: jest.fn(),
-      removeFromWishlist: jest.fn()
-    });
+    jest.clearAllMocks();
   });
 
-  it('renders header with logo', () => {
-    render(
-      <Header
-        logoSrc="/logo.png"
-        logoAlt="Store Logo"
-        homeUrl="/"
-      />
-    );
-
-    const logo = screen.getByAltText('Store Logo');
+  test('renders header with logo', () => {
+    render(<Header logoUrl="/logo.svg" logoAlt="Test Logo" />);
+    const logo = screen.getByAltText('Test Logo');
     expect(logo).toBeInTheDocument();
-    expect(logo).toHaveAttribute('src', '/logo.png');
+    expect(logo).toHaveAttribute('src', '/logo.svg');
   });
 
-  it('renders navigation items', () => {
-    const items = [
-      { label: 'Home', url: '/', active: true },
-      { label: 'Products', url: '/products' },
-      { label: 'About', url: '/about' }
-    ];
-
-    render(<Header navigationItems={items} />);
-
-    expect(screen.getByText('Home')).toBeInTheDocument();
+  test('renders navigation items', () => {
+    render(<Header navigationItems={mockNavigationItems} />);
+    expect(screen.getByLabelText('Home')).toBeInTheDocument();
     expect(screen.getByText('Products')).toBeInTheDocument();
     expect(screen.getByText('About')).toBeInTheDocument();
   });
 
-  it('displays cart count badge', () => {
-    mockUseCart.mockReturnValue({
-      cartCount: 5,
-      isLoading: false,
-      error: null,
-      addToCart: jest.fn(),
-      removeFromCart: jest.fn()
-    });
-
+  test('renders search button with correct aria attributes', () => {
     render(<Header />);
-
-    expect(screen.getByText('5')).toBeInTheDocument();
+    const searchButton = screen.getByRole('button', { name: /search/i });
+    expect(searchButton).toBeInTheDocument();
+    expect(searchButton).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('toggles mobile menu on button click', async () => {
+  test('opens search panel when search button is clicked', () => {
     render(<Header />);
-
-    const menuButton = screen.getByLabelText('Toggle navigation menu');
-    fireEvent.click(menuButton);
-
-    await waitFor(() => {
-      expect(menuButton).toHaveAttribute('aria-expanded', 'true');
-    });
-  });
-
-  it('closes mobile menu on Escape key', async () => {
-    render(<Header />);
-
-    const menuButton = screen.getByLabelText('Toggle navigation menu');
-    fireEvent.click(menuButton);
-
-    await waitFor(() => {
-      expect(menuButton).toHaveAttribute('aria-expanded', 'true');
-    });
-
-    fireEvent.keyDown(document, { key: 'Escape' });
-
-    await waitFor(() => {
-      expect(menuButton).toHaveAttribute('aria-expanded', 'false');
-    });
-  });
-
-  it('toggles search panel', async () => {
-    render(<Header />);
-
-    const searchButton = screen.getByLabelText('Toggle search');
+    const searchButton = screen.getByRole('button', { name: /search/i });
     fireEvent.click(searchButton);
-
-    await waitFor(() => {
-      expect(searchButton).toHaveAttribute('aria-expanded', 'true');
-    });
+    expect(searchButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByPlaceholderText('Search products...')).toBeInTheDocument();
   });
 
-  it('has proper accessibility attributes', () => {
+  test('renders menu button on mobile', () => {
     render(<Header />);
+    const menuButton = screen.getByRole('button', { name: /menu/i });
+    expect(menuButton).toBeInTheDocument();
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+  });
 
+  test('opens mobile menu when menu button is clicked', () => {
+    render(<Header navigationItems={mockNavigationItems} />);
+    const menuButton = screen.getByRole('button', { name: /menu/i });
+    fireEvent.click(menuButton);
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByLabelText('Mobile navigation')).toBeInTheDocument();
+  });
+
+  test('closes menu when Escape key is pressed', () => {
+    render(<Header navigationItems={mockNavigationItems} />);
+    const menuButton = screen.getByRole('button', { name: /menu/i });
+    fireEvent.click(menuButton);
+    expect(menuButton).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  test('renders header as banner landmark', () => {
+    render(<Header />);
     expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByRole('navigation')).toBeInTheDocument();
-    expect(screen.getByLabelText('Home')).toBeInTheDocument();
+  });
+
+  test('renders cart button with correct aria label', () => {
+    render(<Header />);
+    const cartButton = screen.getByLabelText(/cart/i);
+    expect(cartButton).toBeInTheDocument();
+  });
+
+  test('renders wishlist button with correct aria label', () => {
+    render(<Header />);
+    const wishlistButton = screen.getByLabelText(/wishlist/i);
+    expect(wishlistButton).toBeInTheDocument();
+  });
+
+  test('renders navigation with correct role', () => {
+    render(<Header navigationItems={mockNavigationItems} />);
+    expect(screen.getByRole('navigation', { name: /main navigation/i })).toBeInTheDocument();
   });
 });

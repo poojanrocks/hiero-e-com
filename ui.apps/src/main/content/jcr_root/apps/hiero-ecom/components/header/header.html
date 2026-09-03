@@ -1,89 +1,77 @@
-<sly data-sly-use.headerModel="com.hiero.ecom.core.models.HeaderModel">
-  <sly data-sly-use.clientLib="/libs/granite/sightly/templates/clientlib.html"
-       data-sly-call="${clientLib.all @ categories=['hiero-ecom.header']}"></sly>
+<header
+  class="header"
+  role="banner"
+  data-component="header"
+  data-navigation="${header.navigationItems @ context='html'}"
+  data-logo-url="${header.logoUrl @ context='html'}"
+  data-logo-alt="${header.logoAlt @ context='html'}"
+  data-search-placeholder="${header.searchPlaceholder @ context='html'}">
+  <div class="header__container">
+    <div class="header__logo">
+      <a href="/" aria-label="Home">
+        <img src="${header.logoUrl}" alt="${header.logoAlt}" />
+      </a>
+    </div>
 
-  <header class="header" role="banner"
-          data-test="header"
-          data-logo-src="${headerModel.logoSrc}"
-          data-logo-alt="${headerModel.logoAlt}"
-          data-home-url="${headerModel.homeUrl}">
-    <div class="header__container">
-      <div class="header__logo">
-        <a href="${headerModel.homeUrl}" class="header__logo-link" aria-label="Home">
-          <img src="${headerModel.logoSrc}" alt="${headerModel.logoAlt}" class="header__logo-image" />
-        </a>
-      </div>
+    <nav class="header__nav" role="navigation" aria-label="Main navigation">
+      <ul class="header__nav-list">
+        <sly data-sly-list="${header.navigationItems}">
+          <li class="header__nav-item">
+            <a href="${item.url}" class="header__nav-link">${item.label}</a>
+          </li>
+        </sly>
+      </ul>
+    </nav>
 
-      <button class="header__menu-toggle"
-              aria-expanded="false"
-              aria-controls="mobile-menu"
-              aria-label="Toggle navigation menu">
-        <span class="header__menu-icon"></span>
-        <span class="header__menu-icon"></span>
-        <span class="header__menu-icon"></span>
+    <div class="header__actions" id="header-actions">
+      <button
+        class="header__action-btn header__search-btn"
+        aria-label="Search"
+        aria-expanded="false"
+        aria-controls="search-form">
+        <span class="header__icon">🔍</span>
       </button>
 
-      <nav class="header__nav" id="mobile-menu" role="navigation" aria-label="Main navigation"
-           data-test="navigation">
-        <sly data-sly-test="${headerModel.navigationItems}">
-          <ul class="navigation">
-            <sly data-sly-list="${headerModel.navigationItems}">
-              <li class="navigation__item">
-                <a href="${item.url}"
-                   class="navigation__link ${item.active ? 'navigation__link--active' : ''}"
-                   aria-current="${item.active ? 'page' : @}
-                   data-test="nav-item">${item.label}</a>
-              </li>
-            </sly>
-          </ul>
-        </sly>
-      </nav>
+      <a href="/wishlist" class="header__action-btn header__wishlist-btn" aria-label="Wishlist">
+        <span class="header__icon">♡</span>
+        <span class="header__badge" id="wishlist-count"></span>
+      </a>
 
-      <div class="header__actions">
-        <button class="header__search-toggle"
-                aria-expanded="false"
-                aria-label="Toggle search"
-                data-test="search-toggle">
-          <svg class="icon icon--search" aria-hidden="true">
-            <use href="#icon-search"></use>
-          </svg>
-        </button>
+      <a href="/cart" class="header__action-btn header__cart-btn" aria-label="Cart">
+        <span class="header__icon">🛒</span>
+        <span class="header__badge" id="cart-count"></span>
+      </a>
 
-        <a href="/wishlist" class="wishlist-link"
-           aria-label="Wishlist"
-           data-test="wishlist-link">
-          <svg class="icon icon--heart" aria-hidden="true">
-            <use href="#icon-heart"></use>
-          </svg>
-          <span class="wishlist-link__badge" data-test="wishlist-count"></span>
-        </a>
-
-        <a href="/cart" class="cart-link"
-           aria-label="Shopping cart"
-           data-test="cart-link">
-          <svg class="icon icon--cart" aria-hidden="true">
-            <use href="#icon-cart"></use>
-          </svg>
-          <span class="cart-link__badge" data-test="cart-count"></span>
-        </a>
-      </div>
+      <button
+        class="header__menu-toggle"
+        aria-label="Menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu">
+        <span class="header__hamburger"></span>
+      </button>
     </div>
+  </div>
 
-    <div class="header__search-panel" role="search" style="display: none;" data-test="search-panel">
-      <form class="search__form" data-test="search-form">
-        <label for="search-input" class="sr-only">Search products</label>
-        <input id="search-input" type="text" class="search__input"
-               placeholder="Search products..."
-               aria-autocomplete="list"
-               aria-label="Search products"
-               data-test="search-input" />
-        <button type="submit" class="search__button" aria-label="Search">
-          <svg class="icon icon--search" aria-hidden="true">
-            <use href="#icon-search"></use>
-          </svg>
-        </button>
-      </form>
-      <div id="search-results" class="search__results" role="listbox" data-test="search-results"></div>
-    </div>
-  </header>
-</sly>
+  <div class="header__search" id="header-search" style="display: none;">
+    <form id="search-form" class="header__search-form">
+      <input
+        type="text"
+        class="header__search-input"
+        placeholder="${header.searchPlaceholder}"
+        aria-label="Search query" />
+      <button type="submit" class="header__search-submit" aria-label="Submit search">
+        Search
+      </button>
+    </form>
+  </div>
+
+  <nav id="mobile-menu" class="header__mobile-menu" style="display: none;" role="navigation" aria-label="Mobile navigation">
+    <ul class="header__mobile-menu-list">
+      <sly data-sly-list="${header.navigationItems}">
+        <li class="header__mobile-menu-item">
+          <a href="${item.url}" class="header__mobile-menu-link">${item.label}</a>
+        </li>
+      </sly>
+    </ul>
+  </nav>
+</header>

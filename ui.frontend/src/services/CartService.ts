@@ -1,70 +1,88 @@
-import StorageService from './StorageService';
-
-interface CartItem {
-  productId: string;
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
   quantity: number;
-  timestamp: number;
+  imageUrl?: string;
 }
 
-type CartSubscriber = (count: number) => void;
+type CartSubscriber = (items: CartItem[]) => void;
 
-class CartService {
-  private static readonly STORAGE_KEY = 'ecom_cart';
-  private static subscribers: Set<CartSubscriber> = new Set();
+class CartServiceImpl {
+  private items: CartItem[] = [];
+  private subscribers: Set<CartSubscriber> = new Set();
+  private storageKey = 'ecom_cart';
 
-  static async getCartCount(): Promise<number> {
-    const cart = this.getCart();
-    return cart.reduce((total, item) => total + item.quantity, 0);
+  constructor() {
+    this.loadFromStorage();
   }
 
-  static async addItem(productId: string, quantity: number): Promise<void> {
-    const cart = this.getCart();
-    const existingItem = cart.find(item => item.productId === productId);
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
-      existingItem.timestamp = Date.now();
-    } else {
-      cart.push({
-        productId,
-        quantity,
-        timestamp: Date.now()
-      });
-    }
-
-    this.saveCart(cart);
-    this.notifySubscribers();
-  }
-
-  static async removeItem(productId: string): Promise<void> {
-    const cart = this.getCart().filter(item => item.productId !== productId);
-    this.saveCart(cart);
-    this.notifySubscribers();
-  }
-
-  static subscribe(callback: CartSubscriber): () => void {
+  subscribe(callback: CartSubscriber): () => void {
     this.subscribers.add(callback);
+    callback(this.items);
     return () => this.subscribers.delete(callback);
   }
 
-  private static getCart(): CartItem[] {
-    try {
-      const stored = StorageService.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
+  private notify(): void {
+    this.subscribers.forEach(callback => callback(this.items));
+    this.saveToStorage();
+  }
+
+  addItem(item: CartItem): void {
+    const existingItem = this.items.find(i => i.id === item.id);
+    if (existingItem) {
+      existingItem.quantity += item.quantity;
+    } else {
+      this.items.push(item);
+    }
+    this.notify();
+  }
+
+  removeItem(itemId: string): void {
+    this.items = this.items.filter(i => i.id !== itemId);
+    this.notify();
+  }
+
+  updateQuantity(itemId: string, quantity: number): void {
+    const item = this.items.find(i => i.id === itemId);
+    if (item) {
+      if (quantity <= 0) {
+        this.removeItem(itemId);
+      } else {
+        item.quantity = quantity;
+        this.notify();
+      }
     }
   }
 
-  private static saveCart(cart: CartItem[]): void {
-    StorageService.setItem(this.STORAGE_KEY, JSON.stringify(cart));
+  getItems(): CartItem[] {
+    return this.items;
   }
 
-  private static notifySubscribers(): void {
-    this.getCartCount().then(count => {
-      this.subscribers.forEach(callback => callback(count));
-    });
+  clear(): void {
+    this.items = [];
+    this.notify();
+  }
+
+  private saveToStorage(): void {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.items));
+    } catch (e) {
+      console.error('Failed to save cart to storage', e);
+    }
+  }
+
+  private loadFromStorage(): void {
+    try {
+      const stored = localStorage.getItem(this.storageKey);
+      if (stored) {
+        this.items = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error('Failed to load cart from storage', e);
+      this.items = [];
+    }
   }
 }
 
-export default CartService;
+export const CartService = new CartServiceImpl();

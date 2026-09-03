@@ -1,55 +1,38 @@
-interface SearchResult {
-  id: string;
-  name: string;
-  url: string;
-  price?: number;
-  image?: string;
+interface SearchQuery {
+  query: string;
+  timestamp: number;
 }
 
-class SearchService {
-  private static readonly API_ENDPOINT = '/api/search';
-  private static debounceTimer: ReturnType<typeof setTimeout> | null = null;
-  private static readonly DEBOUNCE_DELAY = 300;
+type SearchSubscriber = (query: SearchQuery) => void;
 
-  static async search(query: string, limit: number = 10): Promise<SearchResult[]> {
-    if (!query.trim()) {
-      return [];
+class SearchServiceImpl {
+  private subscribers: Set<SearchSubscriber> = new Set();
+  private lastQuery: SearchQuery | null = null;
+
+  subscribe(callback: SearchSubscriber): () => void {
+    this.subscribers.add(callback);
+    if (this.lastQuery) {
+      callback(this.lastQuery);
     }
-
-    try {
-      const response = await fetch(
-        `${this.API_ENDPOINT}?q=${encodeURIComponent(query)}&limit=${limit}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      return data.results || [];
-    } catch (error) {
-      console.error('Search error:', error);
-      throw error;
-    }
+    return () => this.subscribers.delete(callback);
   }
 
-  static debounced(query: string, limit?: number): Promise<SearchResult[]> {
-    return new Promise((resolve) => {
-      if (this.debounceTimer) {
-        clearTimeout(this.debounceTimer);
-      }
+  private notify(query: SearchQuery): void {
+    this.subscribers.forEach(callback => callback(query));
+  }
 
-      this.debounceTimer = setTimeout(() => {
-        this.search(query, limit).then(resolve).catch(() => resolve([]));
-      }, this.DEBOUNCE_DELAY);
-    });
+  search(query: string): void {
+    const searchQuery: SearchQuery = {
+      query: query.trim(),
+      timestamp: Date.now()
+    };
+    this.lastQuery = searchQuery;
+    this.notify(searchQuery);
+  }
+
+  getLastQuery(): SearchQuery | null {
+    return this.lastQuery;
   }
 }
 
-export default SearchService;
+export const SearchService = new SearchServiceImpl();

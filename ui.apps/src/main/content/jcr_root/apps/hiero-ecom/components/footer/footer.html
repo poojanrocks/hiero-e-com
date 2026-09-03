@@ -1,59 +1,83 @@
-<footer
-  class="footer"
-  role="contentinfo"
-  data-component="footer"
-  data-columns="${footer.columns @ context='html'}"
-  data-company-name="${footer.companyName @ context='html'}"
-  data-social-links="${footer.socialLinks @ context='html'}">
+<footer class="footer" id="footer" data-sly-use.model="com.hiero.ecom.core.models.FooterModel">
   <div class="footer__container">
+    <!-- Footer Content Sections -->
     <div class="footer__content">
-      <sly data-sly-test="${footer.columns}">
-        <div class="footer__columns">
-          <sly data-sly-list="${footer.columns}">
-            <div class="footer__column">
-              <h3 class="footer__column-title">${item.title}</h3>
-              <ul class="footer__links">
-                <sly data-sly-list="${item.links}">
-                  <li class="footer__link-item">
-                    <a href="${item.url}" class="footer__link">${item.label}</a>
-                  </li>
-                </sly>
-              </ul>
-            </div>
-          </sly>
+      <div class="footer__section" data-sly-repeat="${model.sections}">
+        <!-- Mobile Expandable Header -->
+        <button class="footer__expandable-header" 
+                data-expandable-header 
+                aria-expanded="false" 
+                role="button" 
+                tabindex="0">
+          ${item.title}
+        </button>
+
+        <!-- Content (Expanded on mobile) -->
+        <div data-expandable-section>
+          <div data-expandable-content aria-hidden="true">
+            <h3>${item.title}</h3>
+            <ul>
+              <li data-sly-repeat="${item.links}">
+                <a href="${item.url}" 
+                   data-nav-link 
+                   aria-label="${item.label}">
+                  ${item.label}
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-      </sly>
+      </div>
     </div>
 
-    <sly data-sly-test="${footer.socialLinks}">
-      <div class="footer__social">
-        <h3 class="footer__social-title">Follow Us</h3>
-        <ul class="footer__social-list">
-          <sly data-sly-list="${footer.socialLinks}">
-            <li class="footer__social-item">
-              <a
-                href="${item.url}"
-                class="footer__social-link"
-                aria-label="${item.label}"
-                target="_blank"
-                rel="noopener noreferrer">
-                <span class="footer__social-icon">${item.icon}</span>
-              </a>
-            </li>
-          </sly>
-        </ul>
-      </div>
-    </sly>
-  </div>
+    <!-- Newsletter Section -->
+    <div class="footer__newsletter" data-sly-test="${model.showNewsletter}">
+      <h3>Subscribe to Our Newsletter</h3>
+      <p>Get the latest updates on new products and special offers!</p>
+      <form data-newsletter-form>
+        <input type="email" 
+               placeholder="Enter your email address" 
+               required 
+               aria-label="Email address" />
+        <button type="submit" aria-label="Subscribe to newsletter">Subscribe</button>
+      </form>
+    </div>
 
-  <div class="footer__bottom">
-    <p class="footer__copyright">
-      &copy; <span id="footer-year"></span> ${footer.companyName}. All rights reserved.
-    </p>
-    <nav class="footer__legal" aria-label="Legal navigation">
-      <a href="/privacy" class="footer__legal-link">Privacy Policy</a>
-      <a href="/terms" class="footer__legal-link">Terms of Service</a>
-      <a href="/cookies" class="footer__legal-link">Cookie Settings</a>
-    </nav>
+    <!-- Social Links -->
+    <div class="footer__social" data-sly-test="${model.socialLinks}">
+      <a data-sly-repeat="${model.socialLinks}" 
+         href="${item.url}" 
+         title="${item.name}" 
+         data-social-link="${item.name.toLowerCase()}" 
+         aria-label="${item.name}" 
+         target="_blank" 
+         rel="noopener noreferrer">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <text x="5" y="18" font-size="12" font-weight="bold">${item.name.substring(0, 1)}</text>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Bottom Section -->
+    <div class="footer__bottom">
+      <p>&copy; ${model.copyrightText}</p>
+      <div>
+        <a href="${model.privacyPath}" aria-label="Privacy Policy">Privacy Policy</a>
+        <span> | </span>
+        <a href="${model.termsPath}" aria-label="Terms of Service">Terms of Service</a>
+        <span> | </span>
+        <a href="${model.contactPath}" aria-label="Contact Us">Contact Us</a>
+      </div>
+    </div>
   </div>
 </footer>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const { Footer } = window.HieroEcom;
+    if (Footer) {
+      const footer = new Footer('footer');
+      footer.init();
+    }
+  });
+</script>

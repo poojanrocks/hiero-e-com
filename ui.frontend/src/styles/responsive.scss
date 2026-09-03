@@ -1,0 +1,136 @@
+/* Breakpoints */
+$breakpoint-xs: 320px;   /* Mobile */
+$breakpoint-sm: 576px;   /* Small devices */
+$breakpoint-md: 768px;   /* Tablet */
+$breakpoint-lg: 992px;   /* Desktop */
+$breakpoint-xl: 1200px;  /* Large desktop */
+$breakpoint-2xl: 1400px; /* Extra large */
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'xs' {
+    @media (min-width: $breakpoint-xs) {
+      @content;
+    }
+  } @else if $breakpoint == 'sm' {
+    @media (min-width: $breakpoint-sm) {
+      @content;
+    }
+  } @else if $breakpoint == 'md' {
+    @media (min-width: $breakpoint-md) {
+      @content;
+    }
+  } @else if $breakpoint == 'lg' {
+    @media (min-width: $breakpoint-lg) {
+      @content;
+    }
+  } @else if $breakpoint == 'xl' {
+    @media (min-width: $breakpoint-xl) {
+      @content;
+    }
+  } @else if $breakpoint == '2xl' {
+    @media (min-width: $breakpoint-2xl) {
+      @content;
+    }
+  }
+}
+
+/* Mobile-first responsive styles for header */
+.header {
+  &__nav {
+    display: none;
+
+    @include respond-to('lg') {
+      display: flex;
+    }
+  }
+
+  &__search {
+    display: none;
+    flex: 0.3;
+
+    @include respond-to('md') {
+      display: flex;
+    }
+
+    @include respond-to('lg') {
+      flex: 0.25;
+    }
+  }
+
+  .hamburger {
+    display: flex;
+
+    @include respond-to('lg') {
+      display: none;
+    }
+  }
+
+  &__inner {
+    padding: var(--spacing-md);
+
+    @include respond-to('md') {
+      padding: var(--spacing-lg);
+    }
+  }
+}
+
+/* Mobile-first responsive styles for footer */
+.footer {
+  &__content {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+
+    @include respond-to('md') {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    @include respond-to('lg') {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &__expandable-header {
+    display: block;
+
+    @include respond-to('md') {
+      display: none;
+    }
+  }
+
+  &__expandable-content {
+    @include respond-to('md') {
+      display: block !important;
+      max-height: none !important;
+    }
+  }
+
+  &__bottom {
+    flex-direction: column;
+    text-align: center;
+
+    @include respond-to('md') {
+      flex-direction: row;
+      text-align: left;
+    }
+  }
+}
+
+/* Hide elements based on breakpoint */
+.hidden-mobile {
+  display: none;
+
+  @include respond-to('md') {
+    display: block;
+  }
+}
+
+.hidden-tablet {
+  @include respond-to('md') {
+    display: none;
+  }
+}
+
+.hidden-desktop {
+  @include respond-to('lg') {
+    display: none;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "dbDriver": "org.postgresql.Driver",
+  "dbUrl": "jdbc:postgresql://localhost:5432/hiero_ecom",
+  "dbUser": "postgres",
+  "dbPassword": "",
+  "poolSize": 10,
+  "maxPoolSize": 20
+}

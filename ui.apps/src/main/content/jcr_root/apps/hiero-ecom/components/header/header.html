@@ -1,0 +1,53 @@
+<header class="header" role="banner" data-component="header">
+  <div class="header__top">
+    <div class="header__container">
+      <div class="header__logo">
+        <a href="/" class="header__logo-link" aria-label="Home">
+          <span class="header__brand">Hiero eCommerce</span>
+        </a>
+      </div>
+
+      <button class="header__menu-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="header-nav">
+        <span class="header__menu-icon"></span>
+      </button>
+
+      <nav class="header__nav" id="header-nav" role="navigation">
+        <ul class="header__nav-list">
+          <li class="header__nav-item"><a href="/home" class="header__nav-link">Home</a></li>
+          <li class="header__nav-item"><a href="/shop" class="header__nav-link">Shop</a></li>
+          <li class="header__nav-item"><a href="/about" class="header__nav-link">About</a></li>
+          <li class="header__nav-item"><a href="/contact" class="header__nav-link">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="header__actions">
+        <div class="header__search">
+          <form class="header__search-form" role="search">
+            <label for="header-search-input" class="sr-only">Search products</label>
+            <input 
+              id="header-search-input" 
+              type="search" 
+              class="header__search-input" 
+              placeholder="Search products..."
+              aria-label="Search products"
+            />
+            <button type="submit" class="header__search-btn" aria-label="Submit search">
+              <span class="sr-only">Search</span>
+              🔍
+            </button>
+          </form>
+        </div>
+
+        <a href="/wishlist" class="header__action-link header__wishlist" aria-label="Wishlist (0 items)" data-count="0">
+          <span class="header__icon">♡</span>
+          <span class="header__action-label">Wishlist</span>
+        </a>
+
+        <a href="/cart" class="header__action-link header__cart" aria-label="Shopping cart (0 items)" data-count="0">
+          <span class="header__icon">🛒</span>
+          <span class="header__action-label">Cart</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

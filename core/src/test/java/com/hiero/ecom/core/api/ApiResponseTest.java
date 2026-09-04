@@ -1,44 +1,52 @@
 package com.hiero.ecom.core.api;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ApiResponseTest {
-    
+
     @Test
     public void testSuccessResponse() {
+        String correlationId = "test-corr-id";
         String data = "test data";
-        ApiResponse<String> response = ApiResponse.success(data);
-        
+        ApiResponse<String> response = ApiResponse.success(data, correlationId);
+
         assertEquals(200, response.getStatus());
         assertEquals("Success", response.getMessage());
         assertEquals(data, response.getData());
-        assertNotNull(response.getTimestamp());
+        assertEquals(correlationId, response.getCorrelationId());
+        assertTrue(response.getTimestamp() > 0);
     }
-    
+
     @Test
-    public void testErrorResponse() {
-        ApiResponse<?> response = ApiResponse.error(500, "Internal Server Error");
-        
-        assertEquals(500, response.getStatus());
-        assertEquals("Internal Server Error", response.getMessage());
+    public void testCreatedResponse() {
+        String correlationId = "test-corr-id";
+        String data = "created resource";
+        ApiResponse<String> response = ApiResponse.created(data, correlationId);
+
+        assertEquals(201, response.getStatus());
+        assertEquals("Created", response.getMessage());
+        assertEquals(data, response.getData());
     }
-    
+
     @Test
-    public void testNotFoundResponse() {
-        ApiResponse<?> response = ApiResponse.notFound();
-        
-        assertEquals(404, response.getStatus());
-        assertEquals("Resource not found", response.getMessage());
+    public void testNoContentResponse() {
+        String correlationId = "test-corr-id";
+        ApiResponse<String> response = ApiResponse.noContent(correlationId);
+
+        assertEquals(204, response.getStatus());
+        assertEquals("No Content", response.getMessage());
+        assertNull(response.getData());
     }
-    
+
     @Test
-    public void testAddError() {
-        ApiResponse<String> response = new ApiResponse<>(400, "Bad Request");
-        ApiError error = new ApiError("INVALID_INPUT", "Field is required", "name");
-        response.addError(error);
-        
-        assertEquals(1, response.getErrors().size());
-        assertEquals("INVALID_INPUT", response.getErrors().get(0).getCode());
+    public void testResponseWithNullData() {
+        String correlationId = "test-corr-id";
+        ApiResponse<String> response = ApiResponse.success(null, correlationId);
+
+        assertEquals(200, response.getStatus());
+        assertNull(response.getData());
+        assertEquals(correlationId, response.getCorrelationId());
     }
 }

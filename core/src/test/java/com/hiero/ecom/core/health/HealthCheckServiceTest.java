@@ -1,33 +1,63 @@
 package com.hiero.ecom.core.health;
 
-import org.junit.Before;
-import org.junit.Test;
-import java.util.Map;
-import static org.junit.Assert.*;
+import com.hiero.ecom.core.db.DatabaseService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 public class HealthCheckServiceTest {
-    
+    @Mock
+    private DatabaseService databaseService;
+
     private HealthCheckService healthCheckService;
-    
-    @Before
+
+    @BeforeEach
     public void setUp() {
-        healthCheckService = new HealthCheckService();
+        MockitoAnnotations.openMocks(this);
+        healthCheckService = new HealthCheckServiceImpl();
+        ((HealthCheckServiceImpl) healthCheckService).databaseService = databaseService;
     }
-    
+
     @Test
-    public void testGetHealthStatus() {
-        Map<String, Object> health = healthCheckService.getHealthStatus();
-        
-        assertNotNull(health);
-        assertTrue(health.containsKey("status"));
-        assertTrue(health.containsKey("timestamp"));
-        assertTrue(health.containsKey("components"));
-        assertNotNull(health.get("components"));
+    public void testSystemHealthyWhenDatabaseIsHealthy() {
+        when(databaseService.isHealthy()).thenReturn(true);
+        HealthCheckService.HealthStatus status = healthCheckService.getSystemHealth();
+
+        assertTrue(status.isHealthy());
+        assertEquals(200, status.getHttpStatus());
     }
-    
+
     @Test
-    public void testIsHealthy() {
-        boolean healthy = healthCheckService.isHealthy();
-        assertNotNull(healthy);
+    public void testSystemUnhealthyWhenDatabaseIsUnhealthy() {
+        when(databaseService.isHealthy()).thenReturn(false);
+        HealthCheckService.HealthStatus status = healthCheckService.getSystemHealth();
+
+        assertFalse(status.isHealthy());
+        assertEquals(503, status.getHttpStatus());
+    }
+
+    @Test
+    public void testDependencyStatusesIncludesDatabase() {
+        when(databaseService.isHealthy()).thenReturn(true);
+        var statuses = healthCheckService.getDependencyStatuses();
+
+        assertTrue(statuses.containsKey("database"));
+        HealthCheckService.DependencyStatus dbStatus = statuses.get("database");
+        assertTrue(dbStatus.isAvailable());
+        assertEquals("UP", dbStatus.getStatus());
+    }
+
+    @Test
+    public void testHealthStatusToMap() {
+        when(databaseService.isHealthy()).thenReturn(true);
+        HealthCheckService.HealthStatus status = healthCheckService.getSystemHealth();
+        var statusMap = status.toMap();
+
+        assertTrue((boolean) statusMap.get("healthy"));
+        assertNotNull(statusMap.get("dependencies"));
     }
 }

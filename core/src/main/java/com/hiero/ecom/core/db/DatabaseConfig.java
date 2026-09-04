@@ -1,152 +1,68 @@
 package com.hiero.ecom.core.db;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.AttributeType;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import java.util.Map;
-
-@Component(
-    label = "Hiero eCommerce Database Configuration",
-    description = "Database connection pooling and configuration",
-    policy = ConfigurationPolicy.REQUIRE,
-    metatype = true
+@ObjectClassDefinition(
+    name = "Hiero eCommerce Database Configuration",
+    description = "Configuration for database connection pooling and access"
 )
-public class DatabaseConfig {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(DatabaseConfig.class);
-    
-    @Property(
-        label = "Database URL",
-        description = "JDBC database URL",
-        value = "jdbc:mysql://localhost:3306/hiero_ecom"
+public @interface DatabaseConfig {
+
+    @AttributeDefinition(
+        name = "JDBC URL",
+        description = "JDBC connection URL for the database",
+        type = AttributeType.STRING
     )
-    private String databaseUrl;
-    
-    @Property(
-        label = "Database User",
-        description = "Database username",
-        value = "root"
+    String jdbcUrl() default "jdbc:mysql://localhost:3306/hiero_ecom";
+
+    @AttributeDefinition(
+        name = "Database Username",
+        description = "Username for database authentication",
+        type = AttributeType.STRING
     )
-    private String databaseUser;
-    
-    @Property(
-        label = "Database Password",
-        description = "Database password",
-        value = ""
+    String dbUsername() default "root";
+
+    @AttributeDefinition(
+        name = "Database Password",
+        description = "Password for database authentication",
+        type = AttributeType.PASSWORD
     )
-    private String databasePassword;
-    
-    @Property(
-        label = "Max Pool Size",
+    String dbPassword() default "";
+
+    @AttributeDefinition(
+        name = "Maximum Pool Size",
         description = "Maximum number of connections in the pool",
-        intValue = 20
+        type = AttributeType.INTEGER
     )
-    private int maxPoolSize;
-    
-    @Property(
-        label = "Min Pool Size",
-        description = "Minimum number of connections in the pool",
-        intValue = 5
+    int getMaxPoolSize() default 10;
+
+    @AttributeDefinition(
+        name = "Minimum Idle Connections",
+        description = "Minimum number of idle connections to maintain",
+        type = AttributeType.INTEGER
     )
-    private int minPoolSize;
-    
-    @Property(
-        label = "Connection Timeout",
-        description = "Connection timeout in milliseconds",
-        longValue = 30000
+    int getMinIdleConnections() default 2;
+
+    @AttributeDefinition(
+        name = "Connection Timeout (seconds)",
+        description = "Maximum time to wait for a connection from the pool",
+        type = AttributeType.INTEGER
     )
-    private long connectionTimeout;
-    
-    @Property(
-        label = "Idle Timeout",
-        description = "Idle timeout in milliseconds",
-        longValue = 600000
+    int getConnectionTimeoutSeconds() default 30;
+
+    @AttributeDefinition(
+        name = "Idle Timeout (seconds)",
+        description = "Maximum time a connection can remain idle before being closed",
+        type = AttributeType.INTEGER
     )
-    private long idleTimeout;
-    
-    @Property(
-        label = "Max Lifetime",
-        description = "Maximum lifetime of connection in milliseconds",
-        longValue = 1800000
+    int getIdleTimeoutSeconds() default 600;
+
+    @AttributeDefinition(
+        name = "Connection Validation Query",
+        description = "SQL query to validate connection health",
+        type = AttributeType.STRING
     )
-    private long maxLifetime;
-    
-    @Activate
-    protected void activate(Map<String, Object> properties) {
-        this.databaseUrl = getString(properties, "databaseUrl", "jdbc:mysql://localhost:3306/hiero_ecom");
-        this.databaseUser = getString(properties, "databaseUser", "root");
-        this.databasePassword = getString(properties, "databasePassword", "");
-        this.maxPoolSize = getInt(properties, "maxPoolSize", 20);
-        this.minPoolSize = getInt(properties, "minPoolSize", 5);
-        this.connectionTimeout = getLong(properties, "connectionTimeout", 30000L);
-        this.idleTimeout = getLong(properties, "idleTimeout", 600000L);
-        this.maxLifetime = getLong(properties, "maxLifetime", 1800000L);
-        LOG.info("DatabaseConfig activated with URL: {}", databaseUrl);
-    }
-    
-    @Deactivate
-    protected void deactivate() {
-        LOG.info("DatabaseConfig deactivated");
-    }
-    
-    private String getString(Map<String, Object> properties, String key, String defaultValue) {
-        Object value = properties.get(key);
-        return value instanceof String ? (String) value : defaultValue;
-    }
-    
-    private int getInt(Map<String, Object> properties, String key, int defaultValue) {
-        Object value = properties.get(key);
-        if (value instanceof Integer) {
-            return (Integer) value;
-        }
-        return defaultValue;
-    }
-    
-    private long getLong(Map<String, Object> properties, String key, long defaultValue) {
-        Object value = properties.get(key);
-        if (value instanceof Long) {
-            return (Long) value;
-        }
-        if (value instanceof Integer) {
-            return ((Integer) value).longValue();
-        }
-        return defaultValue;
-    }
-    
-    public String getDatabaseUrl() {
-        return databaseUrl;
-    }
-    
-    public String getDatabaseUser() {
-        return databaseUser;
-    }
-    
-    public String getDatabasePassword() {
-        return databasePassword;
-    }
-    
-    public int getMaxPoolSize() {
-        return maxPoolSize;
-    }
-    
-    public int getMinPoolSize() {
-        return minPoolSize;
-    }
-    
-    public long getConnectionTimeout() {
-        return connectionTimeout;
-    }
-    
-    public long getIdleTimeout() {
-        return idleTimeout;
-    }
-    
-    public long getMaxLifetime() {
-        return maxLifetime;
-    }
+    String getValidationQuery() default "SELECT 1";
 }

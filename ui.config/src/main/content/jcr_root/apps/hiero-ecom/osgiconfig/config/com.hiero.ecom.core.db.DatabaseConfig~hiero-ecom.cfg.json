@@ -1,8 +1,10 @@
 {
-  "dbDriver": "org.postgresql.Driver",
-  "dbUrl": "jdbc:postgresql://localhost:5432/hiero_ecom",
-  "dbUser": "postgres",
-  "dbPassword": "",
-  "poolSize": 10,
-  "maxPoolSize": 20
+  "jdbcUrl": "jdbc:mysql://localhost:3306/hiero_ecom",
+  "dbUsername": "hiero_user",
+  "dbPassword": "{encrypted}password",
+  "getMaxPoolSize": 10,
+  "getMinIdleConnections": 2,
+  "getConnectionTimeoutSeconds": 30,
+  "getIdleTimeoutSeconds": 600,
+  "getValidationQuery": "SELECT 1"
 }

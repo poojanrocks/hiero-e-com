@@ -1,0 +1,12 @@
+{
+  "db_url": "jdbc:mysql://localhost:3306/hiero_ecom",
+  "db_username": "${DB_USERNAME:root}",
+  "db_password": "${DB_PASSWORD:}",
+  "pool_max_size": 20,
+  "pool_min_idle": 5,
+  "connection_timeout": 10000,
+  "idle_timeout": 300000,
+  "max_lifetime": 1800000,
+  "validation_enabled": true,
+  "validation_query": "SELECT 1"
+}

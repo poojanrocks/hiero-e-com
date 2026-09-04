@@ -1,152 +1,78 @@
 package com.hiero.ecom.core.db;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.metatype.annotations.AttributeDefinition;
+import org.osgi.service.metatype.annotations.ObjectClassDefinition;
 
-import java.util.Map;
+@ObjectClassDefinition(name = "Hiero eCommerce Database Configuration")
+public @interface DatabaseConfig {
 
-@Component(
-    label = "Hiero eCommerce Database Configuration",
-    description = "Database connection pooling and configuration",
-    policy = ConfigurationPolicy.REQUIRE,
-    metatype = true
-)
-public class DatabaseConfig {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(DatabaseConfig.class);
-    
-    @Property(
-        label = "Database URL",
-        description = "JDBC database URL",
-        value = "jdbc:mysql://localhost:3306/hiero_ecom"
+    @AttributeDefinition(
+        name = "Database URL",
+        description = "JDBC connection URL (e.g., jdbc:mysql://localhost:3306/ecom)"
     )
-    private String databaseUrl;
-    
-    @Property(
-        label = "Database User",
-        description = "Database username",
-        value = "root"
+    String db_url() default "jdbc:mysql://localhost:3306/hiero_ecom";
+
+    @AttributeDefinition(
+        name = "Database Username",
+        description = "Database user for connection"
     )
-    private String databaseUser;
-    
-    @Property(
-        label = "Database Password",
-        description = "Database password",
-        value = ""
+    String db_username() default "root";
+
+    @AttributeDefinition(
+        name = "Database Password",
+        description = "Database password (should be externalized in production)"
     )
-    private String databasePassword;
-    
-    @Property(
-        label = "Max Pool Size",
+    String db_password() default "";
+
+    @AttributeDefinition(
+        name = "Maximum Pool Size",
         description = "Maximum number of connections in the pool",
-        intValue = 20
+        min = "1",
+        max = "100"
     )
-    private int maxPoolSize;
-    
-    @Property(
-        label = "Min Pool Size",
-        description = "Minimum number of connections in the pool",
-        intValue = 5
+    int pool_max_size() default 20;
+
+    @AttributeDefinition(
+        name = "Minimum Idle Connections",
+        description = "Minimum number of idle connections to maintain",
+        min = "0",
+        max = "100"
     )
-    private int minPoolSize;
-    
-    @Property(
-        label = "Connection Timeout",
-        description = "Connection timeout in milliseconds",
-        longValue = 30000
+    int pool_min_idle() default 5;
+
+    @AttributeDefinition(
+        name = "Connection Timeout (ms)",
+        description = "Maximum time to wait for a connection from the pool",
+        min = "1000",
+        max = "60000"
     )
-    private long connectionTimeout;
-    
-    @Property(
-        label = "Idle Timeout",
-        description = "Idle timeout in milliseconds",
-        longValue = 600000
+    long connection_timeout() default 10000L;
+
+    @AttributeDefinition(
+        name = "Idle Timeout (ms)",
+        description = "Maximum idle time before connection is closed",
+        min = "10000",
+        max = "600000"
     )
-    private long idleTimeout;
-    
-    @Property(
-        label = "Max Lifetime",
-        description = "Maximum lifetime of connection in milliseconds",
-        longValue = 1800000
+    long idle_timeout() default 300000L;
+
+    @AttributeDefinition(
+        name = "Max Lifetime (ms)",
+        description = "Maximum lifetime of a connection",
+        min = "30000",
+        max = "3600000"
     )
-    private long maxLifetime;
-    
-    @Activate
-    protected void activate(Map<String, Object> properties) {
-        this.databaseUrl = getString(properties, "databaseUrl", "jdbc:mysql://localhost:3306/hiero_ecom");
-        this.databaseUser = getString(properties, "databaseUser", "root");
-        this.databasePassword = getString(properties, "databasePassword", "");
-        this.maxPoolSize = getInt(properties, "maxPoolSize", 20);
-        this.minPoolSize = getInt(properties, "minPoolSize", 5);
-        this.connectionTimeout = getLong(properties, "connectionTimeout", 30000L);
-        this.idleTimeout = getLong(properties, "idleTimeout", 600000L);
-        this.maxLifetime = getLong(properties, "maxLifetime", 1800000L);
-        LOG.info("DatabaseConfig activated with URL: {}", databaseUrl);
-    }
-    
-    @Deactivate
-    protected void deactivate() {
-        LOG.info("DatabaseConfig deactivated");
-    }
-    
-    private String getString(Map<String, Object> properties, String key, String defaultValue) {
-        Object value = properties.get(key);
-        return value instanceof String ? (String) value : defaultValue;
-    }
-    
-    private int getInt(Map<String, Object> properties, String key, int defaultValue) {
-        Object value = properties.get(key);
-        if (value instanceof Integer) {
-            return (Integer) value;
-        }
-        return defaultValue;
-    }
-    
-    private long getLong(Map<String, Object> properties, String key, long defaultValue) {
-        Object value = properties.get(key);
-        if (value instanceof Long) {
-            return (Long) value;
-        }
-        if (value instanceof Integer) {
-            return ((Integer) value).longValue();
-        }
-        return defaultValue;
-    }
-    
-    public String getDatabaseUrl() {
-        return databaseUrl;
-    }
-    
-    public String getDatabaseUser() {
-        return databaseUser;
-    }
-    
-    public String getDatabasePassword() {
-        return databasePassword;
-    }
-    
-    public int getMaxPoolSize() {
-        return maxPoolSize;
-    }
-    
-    public int getMinPoolSize() {
-        return minPoolSize;
-    }
-    
-    public long getConnectionTimeout() {
-        return connectionTimeout;
-    }
-    
-    public long getIdleTimeout() {
-        return idleTimeout;
-    }
-    
-    public long getMaxLifetime() {
-        return maxLifetime;
-    }
+    long max_lifetime() default 1800000L;
+
+    @AttributeDefinition(
+        name = "Enable Validation",
+        description = "Enable connection validation via test query"
+    )
+    boolean validation_enabled() default true;
+
+    @AttributeDefinition(
+        name = "Validation Query",
+        description = "SQL query to validate connections (e.g., 'SELECT 1')"
+    )
+    String validation_query() default "SELECT 1";
 }

@@ -1,69 +1,62 @@
 package com.hiero.ecom.core.db;
 
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.Service;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-@Component(
-    label = "Hiero eCommerce Database Service",
-    description = "Manages database connections with pooling"
-)
-@Service(DatabaseService.class)
+@Component(service = DatabaseService.class, immediate = true)
 public class DatabaseService {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(DatabaseService.class);
-    
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
+
     @Reference
-    private DatabaseConfig databaseConfig;
-    
-    private java.sql.Connection testConnection;
-    
-    @Activate
-    protected void activate() {
-        LOG.info("DatabaseService activated");
-        LOG.info("Database URL: {}", databaseConfig.getDatabaseUrl());
-    }
-    
-    @Deactivate
-    protected void deactivate() {
-        LOG.info("DatabaseService deactivated");
-        closeConnection(testConnection);
-    }
-    
+    private DataSource dataSource;
+
     public Connection getConnection() throws SQLException {
-        if (databaseConfig == null) {
-            throw new SQLException("Database configuration not available");
+        try {
+            Connection conn = dataSource.getConnection();
+            String correlationId = MDC.get("correlationId");
+            if (correlationId != null) {
+                LOGGER.debug("Connection acquired [{}]", correlationId);
+            }
+            return conn;
+        } catch (SQLException e) {
+            String correlationId = MDC.get("correlationId");
+            LOGGER.error("Failed to acquire database connection [{}]", correlationId, e);
+            throw new SQLException("Database connection failed", e);
         }
-        return testConnection;
     }
-    
-    public void closeConnection(Connection connection) {
-        if (connection != null) {
+
+    public void closeConnection(Connection conn) {
+        if (conn != null) {
             try {
-                connection.close();
+                conn.close();
+                String correlationId = MDC.get("correlationId");
+                if (correlationId != null) {
+                    LOGGER.debug("Connection closed [{}]", correlationId);
+                }
             } catch (SQLException e) {
-                LOG.error("Error closing database connection", e);
+                String correlationId = MDC.get("correlationId");
+                LOGGER.warn("Error closing connection [{}]", correlationId, e);
             }
         }
     }
-    
-    public boolean isConnected() {
-        try {
-            return databaseConfig != null && databaseConfig.getDatabaseUrl() != null;
-        } catch (Exception e) {
-            LOG.error("Database connection check failed", e);
+
+    public DataSource getDataSource() {
+        return dataSource;
+    }
+
+    public boolean validateConnection() {
+        try (Connection conn = getConnection()) {
+            return !conn.isClosed();
+        } catch (SQLException e) {
+            LOGGER.error("Connection validation failed", e);
             return false;
         }
-    }
-    
-    public DatabaseConfig getDatabaseConfig() {
-        return databaseConfig;
     }
 }

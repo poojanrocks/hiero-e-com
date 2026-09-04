@@ -1,96 +1,109 @@
 package com.hiero.ecom.core.api;
 
-import java.io.Serializable;
-import java.util.ArrayList;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.time.Instant;
 import java.util.List;
 
-public class ApiResponse<T> implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
-    private int status;
+/**
+ * Standard API response wrapper with correlation ID and error tracking.
+ */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ApiResponse<T> {
+
+    private boolean success;
+    private String code;
     private String message;
+    private String timestamp;
+    private String correlationId;
     private T data;
     private List<ApiError> errors;
-    private String requestId;
-    private long timestamp;
-    
-    public ApiResponse(int status, String message, T data) {
-        this.status = status;
-        this.message = message;
-        this.data = data;
-        this.errors = new ArrayList<>();
-        this.timestamp = System.currentTimeMillis();
+
+    public ApiResponse() {
+        this.timestamp = Instant.now().toString();
     }
-    
-    public ApiResponse(int status, String message) {
-        this(status, message, null);
+
+    public static <T> ApiResponse<T> success(T data, String correlationId) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.success = true;
+        response.code = "SUCCESS";
+        response.message = "Request processed successfully";
+        response.data = data;
+        response.correlationId = correlationId;
+        return response;
     }
-    
-    public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(200, "Success", data);
+
+    public static <T> ApiResponse<T> error(String code, String message, int httpStatus, String correlationId) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.success = false;
+        response.code = code;
+        response.message = message;
+        response.correlationId = correlationId;
+        return response;
     }
-    
-    public static <T> ApiResponse<T> success(T data, String message) {
-        return new ApiResponse<>(200, message, data);
+
+    public static <T> ApiResponse<T> error(String code, String message, List<ApiError> errors, String correlationId) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.success = false;
+        response.code = code;
+        response.message = message;
+        response.errors = errors;
+        response.correlationId = correlationId;
+        return response;
     }
-    
-    public static <T> ApiResponse<T> notFound() {
-        return new ApiResponse<>(404, "Resource not found");
+
+    public boolean isSuccess() {
+        return success;
     }
-    
-    public static <T> ApiResponse<T> error(int status, String message) {
-        return new ApiResponse<>(status, message);
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
-    
-    public void addError(ApiError error) {
-        this.errors.add(error);
+
+    public String getCode() {
+        return code;
     }
-    
-    public int getStatus() {
-        return status;
+
+    public void setCode(String code) {
+        this.code = code;
     }
-    
-    public void setStatus(int status) {
-        this.status = status;
-    }
-    
+
     public String getMessage() {
         return message;
     }
-    
+
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getCorrelationId() {
+        return correlationId;
+    }
+
+    public void setCorrelationId(String correlationId) {
+        this.correlationId = correlationId;
+    }
+
     public T getData() {
         return data;
     }
-    
+
     public void setData(T data) {
         this.data = data;
     }
-    
+
     public List<ApiError> getErrors() {
         return errors;
     }
-    
+
     public void setErrors(List<ApiError> errors) {
         this.errors = errors;
-    }
-    
-    public String getRequestId() {
-        return requestId;
-    }
-    
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-    
-    public long getTimestamp() {
-        return timestamp;
-    }
-    
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
     }
 }
